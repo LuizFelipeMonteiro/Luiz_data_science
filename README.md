@@ -19,7 +19,7 @@ Data Science na prática
 ## Projetos:
 Veja os tutoriais publicados do Sigmoidal:
 
-* **Analise do Airbnb para Los Angeles:** [Airbnb Los Angeles]([https://www.linkedin.com/in/luiz-felipe-monteiro-6578b0266/](https://colab.research.google.com/drive/1m6PjGij06JY6qlrsj4fVvimQ3kat8DpA#scrollTo=iHXvvHIxaoNc)
+* **Analise do Airbnb para Los Angeles:** [Airbnb Los Angeles](https://colab.research.google.com/drive/1m6PjGij06JY6qlrsj4fVvimQ3kat8DpA#scrollTo=iHXvvHIxaoNc)
 
 ---
 
