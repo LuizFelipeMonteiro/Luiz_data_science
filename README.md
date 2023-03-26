@@ -13,7 +13,7 @@ Data Science na prática
 
 **Links:**
 * [LinkedIn](https://www.linkedin.com/in/luiz-felipe-monteiro-6578b0266/)
-* [Medium](https://www.medium.com)
+* [Medium](https://medium.com/@luizfelipemonteiro20132013)
 
 
 ## Projetos:
