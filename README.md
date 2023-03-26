@@ -21,7 +21,7 @@ Veja os tutoriais publicados do Sigmoidal:
 
 * **Analise do Airbnb para Los Angeles:** [Airbnb Los Angeles](https://colab.research.google.com/drive/1CjqiaFoqV1Ol0oek-DKuHUUDdLUjh19S#scrollTo=kLI0gJtzDGuQ)
 
----
+* **Analise do covid:** [Projeto covid](https://colab.research.google.com/drive/15dgVKQYOqzzfPzhOOIPC8iusWY0xjtlC#scrollTo=J71z_k2jH83H)
 
 
 
