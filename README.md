@@ -23,6 +23,8 @@ Veja os tutoriais publicados do Sigmoidal:
 
 * **Analise do covid:** [Projeto covid](https://colab.research.google.com/drive/15dgVKQYOqzzfPzhOOIPC8iusWY0xjtlC#scrollTo=J71z_k2jH83H)
 
+* **Monitor de licitações (PNCP):** agente que vigia licitações públicas e avisa por Telegram/e-mail — [monitor_licitacoes](monitor_licitacoes/)
+
 
 
 
