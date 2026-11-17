@@ -1,0 +1,73 @@
+name: Monitor de licitações
+
+on:
+  schedule:
+    - cron: "17 9-23/3 * * 1-5"   # dias úteis, às 06h, 09h, 12h, 15h e 18h (horário de Brasília)
+  workflow_dispatch:
+    inputs:
+      sem_notificar:
+        description: "Só registrar, sem enviar avisos (use na 1ª execução)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: monitor-licitacoes
+  cancel-in-progress: false
+
+jobs:
+  monitorar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: monitor_licitacoes
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: monitor_licitacoes/requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      # O banco SQLite guarda o que já foi visto; o cache o mantém entre execuções.
+      - name: Restaurar histórico
+        uses: actions/cache/restore@v4
+        with:
+          path: monitor_licitacoes/dados
+          key: licitacoes-db-${{ github.run_id }}
+          restore-keys: licitacoes-db-
+
+      - name: Rodar monitor
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          EMAIL_DESTINATARIOS: ${{ secrets.EMAIL_DESTINATARIOS }}
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+        run: python -m licitacoes --config config.yaml ${{ inputs.sem_notificar && '--sem-notificar' || '' }}
+
+      - name: Salvar histórico
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: monitor_licitacoes/dados
+          key: licitacoes-db-${{ github.run_id }}
+
+      - name: Publicar relatório
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-licitacoes
+          path: |
+            monitor_licitacoes/dados/relatorio.html
+            monitor_licitacoes/dados/licitacoes.csv
+          retention-days: 14
+          if-no-files-found: ignore

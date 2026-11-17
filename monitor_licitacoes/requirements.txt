@@ -1,0 +1,4 @@
+requests>=2.31
+PyYAML>=6.0
+pydantic>=2.6
+anthropic>=2.9  # só é usado com ia.habilitado: true

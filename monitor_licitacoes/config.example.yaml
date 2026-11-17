@@ -1,0 +1,64 @@
+# Copie para config.yaml e ajuste ao seu negócio.
+# Credenciais (tokens, senhas) NUNCA vão aqui — use variáveis de ambiente (ver README).
+
+busca:
+  # proposta   = licitações com prazo de propostas ABERTO (recomendado para quem quer participar)
+  # publicacao = tudo que foi publicado nos últimos `dias_retroativos` dias
+  modo: proposta
+  dias_a_frente: 60        # modo proposta: prazos que encerram em até N dias
+  dias_retroativos: 3      # modo publicacao
+  # Códigos de modalidade (Lei 14.133):
+  #  1 Leilão eletrônico   2 Diálogo competitivo   3 Concurso
+  #  4 Concorrência eletrônica   5 Concorrência presencial
+  #  6 Pregão eletrônico   7 Pregão presencial   8 Dispensa
+  #  9 Inexigibilidade   10 Manifestação de interesse
+  #  11 Pré-qualificação   12 Credenciamento   13 Leilão presencial
+  modalidades: [6, 4, 8]
+  ufs: []                  # ex.: [SP, RJ, MG]. Vazio = Brasil inteiro
+  max_paginas: 40          # 50 registros por página, por modalidade/UF
+
+filtros:
+  # Casam sem diferenciar maiúsculas/acentos. Use * no fim para prefixo (ex.: "softwar*").
+  palavras_chave:
+    - ciência de dados
+    - análise de dados
+    - business intelligence
+    - power bi
+    - inteligência artificial
+    - machine learning
+    - data warehouse
+    - painel* de indicadores
+    - dashboard*
+  palavras_excluidas:
+    - gêneros alimentícios
+    - material de limpeza
+  valor_minimo: 5000       # em R$; null para não filtrar
+  valor_maximo: null
+  aceitar_sem_valor: true  # muitas licitações têm valor sigiloso/zerado
+  municipios: []           # ex.: [São Paulo, Campinas]
+
+ia:
+  habilitado: false        # true = Claude dá nota 0-10 a cada licitação filtrada (requer ANTHROPIC_API_KEY)
+  modelo: claude-opus-5-5
+  esforco: low             # low | medium | high
+  nota_minima: 6           # só notifica licitações com nota >= isso
+  perfil_empresa: |
+    Consultoria de ciência de dados com 3 pessoas. Fazemos dashboards em Power BI,
+    modelagem preditiva em Python, ETL e treinamento de equipes. Não fornecemos
+    hardware nem licenças de software de terceiros. Atuamos remotamente em todo o Brasil.
+
+notificacoes:
+  console: true
+  telegram:
+    habilitado: false      # requer TELEGRAM_BOT_TOKEN e TELEGRAM_CHAT_ID
+  email:
+    habilitado: false      # requer SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
+    destinatarios: []      # ou EMAIL_DESTINATARIOS=a@x.com,b@y.com
+    tls: true
+  webhook:
+    habilitado: false      # requer WEBHOOK_URL (Slack, Discord, Google Chat, Mattermost)
+
+saida:
+  banco: dados/licitacoes.db
+  csv: dados/licitacoes.csv
+  html: dados/relatorio.html
