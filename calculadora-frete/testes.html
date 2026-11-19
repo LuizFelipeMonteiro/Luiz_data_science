@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Testes da tabela – LFM Transportes</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 16px; background: #f5f6f8; color: #1d2330; }
+    h1 { font-size: 1.3rem; margin: 0 0 4px; }
+    p { margin: 0 0 16px; color: #555; }
+    .resumo { padding: 12px 16px; border-radius: 10px; font-weight: 600; margin-bottom: 16px; }
+    .resumo.ok { background: #e3f6e8; color: #17692f; }
+    .resumo.falha { background: #fde7e7; color: #a11d1d; }
+    .tabela { overflow-x: auto; background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; white-space: nowrap; }
+    th { background: #fafbfc; font-weight: 600; }
+    tr.ok td:first-child { color: #17692f; }
+    tr.falha { background: #fff4f4; }
+    tr.falha td:first-child { color: #a11d1d; font-weight: 700; }
+    .obs { color: #777; white-space: normal; min-width: 240px; }
+  </style>
+</head>
+<body>
+  <h1>Conferência da tabela de preços</h1>
+  <p>Esta página confere se a calculadora acerta os exemplos. Abra de novo sempre que mudar o <code>config.js</code>.</p>
+  <div id="resumo" class="resumo"></div>
+  <div class="tabela">
+    <table>
+      <thead><tr><th>Resultado</th><th>Distância</th><th>Onde</th><th>Tipo</th><th>Esperado</th><th>Calculado</th><th>Regra usada</th><th>Obs.</th></tr></thead>
+      <tbody id="linhas"></tbody>
+    </table>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="js/precos.js"></script>
+  <script src="testes/casos.js"></script>
+  <script src="testes/rodar-testes.js"></script>
+  <script>
+    (function () {
+      var f = LFM.precos.formatarReais;
+      var res = LFM.rodarTestes(LFM_CONFIG, LFM.precos, LFM.casosDeTeste);
+      var falhas = res.filter(function (t) { return !t.ok; }).length;
+      var resumo = document.getElementById("resumo");
+      resumo.className = "resumo " + (falhas ? "falha" : "ok");
+      resumo.textContent = falhas
+        ? "✗ " + falhas + " de " + res.length + " exemplos com valor diferente do esperado"
+        : "✓ Todos os " + res.length + " exemplos estão corretos";
+
+      var tbody = document.getElementById("linhas");
+      res.forEach(function (t) {
+        var c = t.caso, tr = document.createElement("tr");
+        tr.className = t.ok ? "ok" : "falha";
+        var tipo = c.modalidade + (c.especial ? " + especial (" + (c.especial.tipo === "fixo" ? "+" + f(c.especial.valor) : "+" + c.especial.valor + "%") + ")" : "");
+        [ t.ok ? "✓ certo" : "✗ errado",
+          String(c.km).replace(".", ",") + " km",
+          c.dentro ? "Ponta Grossa" : "Fora de PG",
+          tipo, f(c.esperado), f(t.resultado.valor), t.resultado.regra, c.obs || ""
+        ].forEach(function (txt, i) {
+          var td = document.createElement("td");
+          td.textContent = txt;
+          if (i >= 6) td.className = "obs";
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    })();
+  </script>
+</body>
+</html>
