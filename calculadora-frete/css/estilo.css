@@ -1,0 +1,163 @@
+/* ============================================================
+   Visual da calculadora – LFM Transportes
+   Para trocar as cores da marca, mude só as variáveis abaixo.
+   ============================================================ */
+:root {
+  --cor-marca: #0f3d6e;        /* azul principal (cabeçalho, botões) */
+  --cor-marca-clara: #e8f0f9;  /* fundo da opção selecionada */
+  --cor-destaque: #0f3d6e;     /* cor do valor final */
+  --cor-fundo: #f3f5f8;
+  --cor-cartao: #ffffff;
+  --cor-texto: #1d2330;
+  --cor-suave: #5f6b7a;
+  --cor-borda: #d8dee6;
+  --cor-erro: #b42318;
+  --raio: 12px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-size: 16px;            /* 16px evita o zoom automático do iPhone nos campos */
+  line-height: 1.4;
+}
+
+/* ---------- Cabeçalho ---------- */
+.topo {
+  background: var(--cor-marca);
+  color: #fff;
+  padding: 18px 16px;
+}
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.logo, .logo-reserva {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.logo { object-fit: contain; background: #fff; }
+.logo-reserva {
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: var(--cor-marca);
+  font-weight: 800;
+  letter-spacing: .5px;
+}
+.logo-reserva[hidden], .logo[hidden] { display: none; }
+.topo h1 { margin: 0; font-size: 1.3rem; }
+.subtitulo { margin: 2px 0 0; opacity: .85; font-size: .9rem; }
+
+/* ---------- Conteúdo ---------- */
+.conteudo {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+}
+.cartao {
+  background: var(--cor-cartao);
+  border-radius: var(--raio);
+  padding: 20px 16px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, .08);
+}
+.cartao h2 { margin: 0 0 16px; font-size: 1.15rem; }
+
+.grupo {
+  border: 0;
+  padding: 0;
+  margin: 0 0 18px;
+}
+.grupo legend {
+  font-weight: 600;
+  margin-bottom: 8px;
+  padding: 0;
+}
+.etiqueta {
+  font-size: .72rem;
+  font-weight: 600;
+  background: #fff4d6;
+  color: #8a5a00;
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+/* Opções do tipo "botão" (avulsa / agrupada, dentro / fora) */
+.opcoes { display: grid; gap: 8px; }
+.opcoes-dupla { grid-template-columns: 1fr 1fr; margin-top: 10px; }
+.opcao { position: relative; cursor: pointer; }
+.opcao input { position: absolute; opacity: 0; pointer-events: none; }
+.opcao span {
+  display: block;
+  padding: 12px 14px;
+  border: 1.5px solid var(--cor-borda);
+  border-radius: 10px;
+  background: #fff;
+  transition: border-color .15s, background .15s;
+}
+.opcao small { display: block; color: var(--cor-suave); font-size: .82rem; margin-top: 2px; }
+.opcao input:checked + span {
+  border-color: var(--cor-marca);
+  background: var(--cor-marca-clara);
+  font-weight: 600;
+}
+.opcao input:focus-visible + span { outline: 3px solid #9cc0ea; outline-offset: 1px; }
+
+/* Campos de texto */
+.campo { display: block; }
+.campo span { display: block; font-size: .9rem; color: var(--cor-suave); margin-bottom: 6px; }
+.campo input {
+  width: 100%;
+  font-size: 1rem;
+  padding: 12px 14px;
+  border: 1.5px solid var(--cor-borda);
+  border-radius: 10px;
+}
+.campo input:focus { outline: none; border-color: var(--cor-marca); box-shadow: 0 0 0 3px #d4e3f5; }
+
+/* Caixa de marcar (carga especial) */
+.marcar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  cursor: pointer;
+}
+.marcar[hidden] { display: none; }
+.marcar input { width: 20px; height: 20px; accent-color: var(--cor-marca); }
+
+/* ---------- Resultado ---------- */
+.resultado {
+  border-top: 1px solid #eef1f5;
+  padding-top: 16px;
+  text-align: center;
+}
+.resultado-vazio { color: var(--cor-suave); margin: 8px 0; }
+.resultado-rotulo { margin: 0; color: var(--cor-suave); font-size: .9rem; }
+.resultado-valor {
+  margin: 4px 0;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--cor-destaque);
+  letter-spacing: -.5px;
+}
+.resultado-detalhe { margin: 0; color: var(--cor-suave); font-size: .9rem; }
+.erro { color: var(--cor-erro); margin: 8px 0 0; }
+
+.rodape {
+  text-align: center;
+  color: var(--cor-suave);
+  font-size: .8rem;
+  margin: 16px 0 8px;
+}

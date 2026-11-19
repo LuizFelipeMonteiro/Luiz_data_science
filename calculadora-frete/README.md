@@ -23,7 +23,7 @@ Depois de editar o `config.js`, abra `testes.html` no navegador: tudo verde = ta
 ## Etapas
 
 - [x] 1. Tabela no config + cálculo + página de testes
-- [ ] 2. Tela para celular (km digitado à mão)
+- [x] 2. Tela para celular (km digitado à mão)
 - [ ] 3. Autocomplete de endereços
 - [ ] 4. Distância de rota + dentro/fora de PG
 - [ ] 5. Botão "Agendar pelo WhatsApp"
