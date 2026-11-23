@@ -29,3 +29,13 @@ Depois de editar o `config.js`, abra `testes.html` no navegador: tudo verde = ta
 - [ ] 5. Botão "Agendar pelo WhatsApp"
 - [ ] 6. Publicar e gerar link para parceiros
 - [ ] 7. Carga especial e ajustes finos
+
+## Ideias para o futuro (não construir agora)
+
+- **Tabela por cliente parceiro:** cada cliente com condições negociadas
+  (ex.: alto volume → sem cobrança de retorno, desconto por km, faixas próprias).
+  Caminho previsto: um arquivo de configuração por cliente que só sobrescreve o
+  que muda em relação ao `config.js` padrão, escolhido pelo link
+  (ex.: `.../?parceiro=confeitaria`). O `js/precos.js` já recebe o config como
+  parâmetro, então não precisa ser reescrito.
+- **Agendamento para pequenos negócios parceiros** (próxima fase após a calculadora).
