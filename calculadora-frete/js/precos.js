@@ -54,9 +54,10 @@
       } else {
         var limite = tabela.faixas[tabela.faixas.length - 1].ate;
         var acima = cidade.acimaDaUltimaFaixa[modalidade];
-        var kmExtra = arredondar(km - limite, 3);
-        valor = acima.base + kmExtra * acima.porKmExtra;
-        regra = tabela.rotulo + ": acima de " + limite + " km (+" + kmExtra + " km extra)";
+        var valorUltimaFaixa = tabela.faixas[tabela.faixas.length - 1].valor;
+        // Proteção: uma entrega maior nunca sai mais barata que a última faixa.
+        valor = Math.max(km * acima.porKm, valorUltimaFaixa);
+        regra = tabela.rotulo + ": acima de " + limite + " km (" + km + " km × " + acima.porKm + ")";
       }
     } else {
       var fora = config.foraDaCidade;

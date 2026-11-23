@@ -48,11 +48,11 @@ window.LFM_CONFIG = {
       },
     },
 
-    // Acima da última faixa (7 km): valor base + valor por km que passar.
-    // Ex.: 10 km = 22,00 + 3 × 2,50 = 29,50
+    // Acima da última faixa (7 km): cobra R$ por km do trajeto INTEIRO.
+    // Ex.: 8 km = 8 × 4,00 = R$ 32,00  |  10 km = R$ 40,00  |  15 km = R$ 60,00
     acimaDaUltimaFaixa: {
-      avulsa:   { base: 22.00, porKmExtra: 2.50 },
-      agrupada: { base: 22.00, porKmExtra: 2.50 },  // mesmo valor da avulsa, conforme a tabela atual
+      avulsa:   { porKm: 4.00 },
+      agrupada: { porKm: 4.00 },   // hoje igual à avulsa; mude se quiser desconto
     },
   },
 

@@ -14,14 +14,16 @@
     { km: 5,    dentro: true,  modalidade: "avulsa",   esperado: 18.00 },
     { km: 6.9,  dentro: true,  modalidade: "avulsa",   esperado: 22.00 },
     { km: 7,    dentro: true,  modalidade: "avulsa",   esperado: 22.00 },
-    { km: 7.4,  dentro: true,  modalidade: "avulsa",   esperado: 23.00, obs: "22 + 0,4 km × 2,50" },
-    { km: 10,   dentro: true,  modalidade: "avulsa",   esperado: 29.50, obs: "exemplo da tabela do Luiz" },
+    { km: 7.4,  dentro: true,  modalidade: "avulsa",   esperado: 29.60, obs: "7,4 km × 4,00" },
+    { km: 8,    dentro: true,  modalidade: "avulsa",   esperado: 32.00, obs: "preço praticado pelo Luiz" },
+    { km: 10,   dentro: true,  modalidade: "avulsa",   esperado: 40.00, obs: "preço praticado pelo Luiz" },
+    { km: 15,   dentro: true,  modalidade: "avulsa",   esperado: 60.00, obs: "preço praticado pelo Luiz" },
 
     // ---- Agrupada dentro de PG ----
     { km: 2,    dentro: true,  modalidade: "agrupada", esperado: 12.00 },
     { km: 4,    dentro: true,  modalidade: "agrupada", esperado: 14.00 },
     { km: 7,    dentro: true,  modalidade: "agrupada", esperado: 17.00 },
-    { km: 10,   dentro: true,  modalidade: "agrupada", esperado: 29.50, obs: "acima de 7 km usa a mesma regra da avulsa" },
+    { km: 10,   dentro: true,  modalidade: "agrupada", esperado: 40.00, obs: "acima de 7 km usa a mesma regra da avulsa" },
 
     // ---- Fora de PG (ida e volta) ----
     { km: 20,   dentro: false, modalidade: "avulsa",   esperado: 100.00, obs: "20 km × 2 × 2,50" },
