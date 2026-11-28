@@ -1,11 +1,11 @@
 /*
  * Liga a TELA às REGRAS.
  *
- * - Lê o que o usuário escolheu na página.
- * - Chama LFM.precos.calcularFrete (do precos.js).
- * - Mostra o valor.
+ * 1. A pessoa escolhe os endereços (autocompletar.js + mapas.js).
+ * 2. Calculamos a rota de carro (mapas.js).
+ * 3. Calculamos o preço (precos.js) e mostramos só o valor final.
  *
- * Os preços não ficam aqui. Eles ficam no config.js.
+ * Os preços não ficam aqui. Eles ficam no config.js / parceiros.js.
  */
 (function () {
   "use strict";
@@ -14,8 +14,12 @@
   var codigoParceiro = new URLSearchParams(window.location.search).get("parceiro");
   var config = window.LFM.parceiro.montarConfig(window.LFM_CONFIG, window.LFM_PARCEIROS, codigoParceiro);
   var precos = window.LFM.precos;
+  var mapas = window.LFM.mapas;
 
-  // Atalho: pega um elemento da página pelo id
+  // O que já foi escolhido na tela
+  var estado = { retirada: null, entrega: null, rota: null };
+  var calculoAtual = 0;   // evita mostrar resultado velho se a pessoa trocar o endereço no meio
+
   function el(id) { return document.getElementById(id); }
 
   // ---------- 1. Preenche a página com os dados do config ----------
@@ -66,37 +70,76 @@
     el("bloco-especial").hidden = false;
   }
 
-  // ---------- 2. Lê o que o usuário escolheu ----------
+  // ---------- 2. Endereços ----------
+
+  // O celular lembra a última retirada (fica só no aparelho de quem usa)
+  var CHAVE_SALVA = "lfm.retirada";
+  function lerRetiradaSalva() {
+    try { return JSON.parse(localStorage.getItem(CHAVE_SALVA)); } catch (e) { return null; }
+  }
+  function salvarRetirada(item) {
+    try { localStorage.setItem(CHAVE_SALVA, JSON.stringify(item)); } catch (e) { /* sem problema */ }
+  }
+
+  function buscar(texto, sinal) { return mapas.buscarEnderecos(texto, config.mapas, sinal); }
+
+  function montarEnderecos() {
+    var campoRetirada = LFM.autocompletar(el("retirada"), {
+      buscar: buscar,
+      aoEscolher: function (item) {
+        estado.retirada = item;
+        if (item && config.mapas.lembrarRetirada) salvarRetirada(item);
+        aoMudarEndereco();
+        if (item && !estado.entrega) el("entrega").focus();
+      },
+    });
+    LFM.autocompletar(el("entrega"), {
+      buscar: buscar,
+      aoEscolher: function (item) {
+        estado.entrega = item;
+        aoMudarEndereco();
+        if (item) el("entrega").blur();   // fecha o teclado do celular para mostrar o valor
+      },
+    });
+
+    var salva = config.mapas.lembrarRetirada && lerRetiradaSalva();
+    if (salva && salva.lat) campoRetirada.definir(salva);
+  }
+
+  // ---------- 3. Rota ----------
+  function aoMudarEndereco() {
+    estado.rota = null;
+    if (!estado.retirada || !estado.entrega) { mostrar("vazio"); return; }
+
+    var meuCalculo = ++calculoAtual;
+    mostrar("carregando");
+    mapas.calcularRota(estado.retirada, estado.entrega, config.mapas, window.LFM_CHAVE_ROTAS)
+      .then(function (rota) {
+        if (meuCalculo !== calculoAtual) return;   // a pessoa já mudou o endereço
+        estado.rota = rota;
+        atualizarValor();
+      })
+      .catch(function (erro) {
+        if (meuCalculo !== calculoAtual) return;
+        console.error("Erro ao calcular rota:", erro);
+        mostrar("erro", "Não conseguimos calcular a distância agora. Confira os endereços ou chame a LFM no WhatsApp.");
+      });
+  }
+
+  // ---------- 4. Preço ----------
   function valorMarcado(nome) {
     var marcado = document.querySelector('input[name="' + nome + '"]:checked');
     return marcado ? marcado.value : null;
   }
 
-  // Aceita "4,5" ou "4.5"
-  function lerKm() {
-    var texto = el("km").value.trim().replace(",", ".");
-    if (texto === "") return null;
-    var km = Number(texto);
-    return isFinite(km) && km >= 0 ? km : NaN;
-  }
+  function atualizarValor() {
+    if (!estado.rota) return;
+    var nomeCidade = config.dentroDaCidade.nomeCidade;
+    var dentro = mapas.mesmaCidade(estado.retirada.cidade, nomeCidade) &&
+                 mapas.mesmaCidade(estado.entrega.cidade, nomeCidade);
 
-  // ---------- 3. Calcula e mostra ----------
-  function atualizar() {
-    var km = lerKm();
-    var erro = el("erro");
-    erro.hidden = true;
-
-    if (km === null) { mostrarVazio(); return; }
-    if (isNaN(km)) {
-      mostrarVazio();
-      erro.textContent = "Digite só números. Ex.: 4,5";
-      erro.hidden = false;
-      return;
-    }
-
-    var dentro = valorMarcado("local") === "dentro";
     var resultado = precos.calcularFrete({
-      distanciaKm: km,
+      distanciaKm: estado.rota.km,
       dentroDaCidade: dentro,
       modalidade: valorMarcado("modalidade"),
       cargaEspecial: el("especial").checked,
@@ -104,23 +147,31 @@
 
     el("valor").textContent = precos.formatarReais(resultado.valor);
     el("detalhe").textContent =
-      String(resultado.kmConsiderado).replace(".", ",") + " km" +
-      (dentro ? " · dentro de " + config.dentroDaCidade.nomeCidade : " · fora da cidade (ida e volta)");
-    el("resultado-vazio").hidden = true;
-    el("resultado-cheio").hidden = false;
+      String(resultado.kmConsiderado).replace(".", ",") + " km de carro · cerca de " +
+      Math.max(1, Math.round(estado.rota.minutos)) + " min" +
+      (dentro ? "" : " · fora de " + nomeCidade + " (ida e volta)");
+    mostrar("valor");
   }
 
-  function mostrarVazio() {
-    el("resultado-vazio").hidden = false;
-    el("resultado-cheio").hidden = true;
+  // ---------- Mostra a parte certa do quadro de resultado ----------
+  function mostrar(qual, mensagem) {
+    el("resultado-vazio").hidden = !(qual === "vazio" || qual === "carregando");
+    el("resultado-vazio").textContent = qual === "carregando"
+      ? "Calculando a rota…"
+      : "Escolha os dois endereços para ver o valor.";
+    el("resultado-cheio").hidden = qual !== "valor";
+    el("erro").hidden = qual !== "erro";
+    if (qual === "erro") el("erro").textContent = mensagem;
   }
 
-  // ---------- 4. Liga tudo ----------
+  // ---------- Liga tudo ----------
   montarCabecalho();
   montarModalidades();
   montarCargaEspecial();
+  montarEnderecos();
 
-  // Recalcula a cada tecla digitada ou opção clicada
-  document.querySelector(".cartao").addEventListener("input", atualizar);
-  document.querySelector(".cartao").addEventListener("change", atualizar);
+  // Trocar avulsa/agrupada ou carga especial recalcula o preço (sem refazer a rota)
+  document.querySelector(".cartao").addEventListener("change", function (e) {
+    if (e.target.name === "modalidade" || e.target.id === "especial") atualizarValor();
+  });
 })();

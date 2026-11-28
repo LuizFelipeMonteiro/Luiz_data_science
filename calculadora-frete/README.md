@@ -24,8 +24,8 @@ Depois de editar o `config.js`, abra `testes.html` no navegador: tudo verde = ta
 
 - [x] 1. Tabela no config + cálculo + página de testes
 - [x] 2. Tela para celular (km digitado à mão)
-- [ ] 3. Autocomplete de endereços
-- [ ] 4. Distância de rota + dentro/fora de PG
+- [x] 3. Autocomplete de endereços (Photon)
+- [x] 4. Distância de rota (OpenRouteService) + dentro/fora de PG
 - [ ] 5. Botão "Agendar pelo WhatsApp"
 - [ ] 6. Publicar e gerar link para parceiros
 - [ ] 7. Carga especial e ajustes finos
@@ -39,3 +39,9 @@ Depois de editar o `config.js`, abra `testes.html` no navegador: tudo verde = ta
   (ex.: `.../?parceiro=confeitaria`). O `js/precos.js` já recebe o config como
   parâmetro, então não precisa ser reescrito.
 - **Agendamento para pequenos negócios parceiros** (próxima fase após a calculadora).
+
+## Chave do serviço de rotas
+
+A rota usa o OpenRouteService (endereço novo desde 11/2026: `api.heigit.org`).
+A chave fica no arquivo `chave.js`, que **não vai para o GitHub**.
+Para criar: copie `chave.exemplo.js` com o nome `chave.js` e cole sua chave.

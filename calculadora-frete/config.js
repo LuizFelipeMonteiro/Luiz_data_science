@@ -75,6 +75,16 @@ window.LFM_CONFIG = {
     valor: 5.00,                      // R$ 5,00 se "fixo"; ou 20 = 20% se "percentual"
   },
 
+  // ---------- Mapas (normalmente não precisa mexer) ----------
+  // A chave do serviço de rotas fica no arquivo chave.js.
+  mapas: {
+    buscaUrl: "https://photon.komoot.io/api/",                                    // sugestões de endereço
+    rotaUrl:  "https://api.heigit.org/openrouteservice/v2/directions/driving-car", // distância de carro
+    centro: { lat: -25.0945, lon: -50.1633 },   // centro de Ponta Grossa: sugestões próximas aparecem primeiro
+    regiao: [-51.2, -25.8, -49.4, -24.3],       // só busca nos Campos Gerais (oeste, sul, leste, norte)
+    lembrarRetirada: true,                      // o celular de quem usa lembra o último endereço de retirada
+  },
+
   // ---------- Arredondamento ----------
   arredondamento: {
     casasDecimaisKm: 1,               // distância usada no cálculo: 1 casa (ex.: 7,4 km)

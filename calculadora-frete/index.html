@@ -34,20 +34,21 @@
         </div>
       </fieldset>
 
-      <!-- ========== DISTÂNCIA (TEMPORÁRIO) ==========
-           Na etapa 3/4 isto vira: campos de endereço + cálculo automático da rota. -->
-      <fieldset class="grupo provisorio">
-        <legend>Distância <span class="etiqueta">teste – será automático</span></legend>
+      <!-- ========== ENDEREÇOS ========== -->
+      <fieldset class="grupo">
+        <legend>Endereços</legend>
 
-        <label class="campo">
-          <span>Quantos km de carro?</span>
-          <input id="km" type="text" inputmode="decimal" placeholder="Ex.: 4,5" autocomplete="off">
-        </label>
-
-        <div class="opcoes opcoes-dupla">
-          <label class="opcao"><input type="radio" name="local" value="dentro" checked><span>Dentro de PG</span></label>
-          <label class="opcao"><input type="radio" name="local" value="fora"><span>Fora de PG</span></label>
+        <div class="campo campo-endereco">
+          <label for="retirada">Retirada</label>
+          <input id="retirada" type="text" placeholder="Digite a rua ou o local" autocomplete="off" autocapitalize="words" enterkeyhint="next">
         </div>
+
+        <div class="campo campo-endereco">
+          <label for="entrega">Entrega</label>
+          <input id="entrega" type="text" placeholder="Digite a rua ou o local" autocomplete="off" autocapitalize="words" enterkeyhint="done">
+        </div>
+
+        <p class="dica">Digite o nome da rua e escolha na lista. O número da casa você informa na hora de agendar.</p>
       </fieldset>
 
       <!-- ========== CARGA ESPECIAL (só aparece se ativada no config) ========== -->
@@ -58,7 +59,7 @@
 
       <!-- ========== RESULTADO ========== -->
       <div class="resultado" id="resultado" aria-live="polite">
-        <p class="resultado-vazio" id="resultado-vazio">Preencha a distância para ver o valor.</p>
+        <p class="resultado-vazio" id="resultado-vazio">Escolha os dois endereços para ver o valor.</p>
         <div id="resultado-cheio" hidden>
           <p class="resultado-rotulo">Valor da entrega</p>
           <p class="resultado-valor" id="valor">R$ 0,00</p>
@@ -68,14 +69,17 @@
       </div>
     </section>
 
-    <p class="rodape">Nenhum dado pessoal é guardado nesta página.</p>
+    <p class="rodape">A LFM não guarda seus dados. O último endereço de retirada fica salvo só neste aparelho.</p>
   </main>
 
   <!-- A ordem importa: primeiro a tabela, depois as contas, por último a tela -->
   <script src="config.js"></script>
   <script src="parceiros.js"></script>
   <script src="js/parceiro.js"></script>
+  <script src="chave.js"></script>
   <script src="js/precos.js"></script>
+  <script src="js/mapas.js"></script>
+  <script src="js/autocompletar.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

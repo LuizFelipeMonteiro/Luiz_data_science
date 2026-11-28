@@ -116,7 +116,7 @@ body {
 
 /* Campos de texto */
 .campo { display: block; }
-.campo span { display: block; font-size: .9rem; color: var(--cor-suave); margin-bottom: 6px; }
+.campo > span { display: block; font-size: .9rem; color: var(--cor-suave); margin-bottom: 6px; }
 .campo input {
   width: 100%;
   font-size: 1rem;
@@ -161,3 +161,34 @@ body {
   font-size: .8rem;
   margin: 16px 0 8px;
 }
+
+/* ---------- Campos de endereço com sugestões ---------- */
+.campo-endereco { position: relative; margin-bottom: 12px; }
+.campo-endereco label { display: block; font-size: .9rem; color: var(--cor-suave); margin-bottom: 6px; }
+.dica { font-size: .82rem; color: var(--cor-suave); margin: 4px 0 0; }
+
+.sugestoes {
+  position: absolute;
+  z-index: 10;
+  left: 0; right: 0;
+  top: 100%;
+  margin: 4px 0 0;
+  padding: 4px;
+  list-style: none;
+  background: #fff;
+  border: 1px solid var(--cor-borda);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(16, 24, 40, .14);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.sugestoes[hidden] { display: none; }
+.sugestao {
+  padding: 10px 12px;          /* área de toque confortável no celular */
+  border-radius: 8px;
+  cursor: pointer;
+}
+.sugestao strong { display: block; font-weight: 600; }
+.sugestao span { display: block; font-size: .85rem; color: var(--cor-suave); }
+.sugestao:hover, .sugestao.ativa { background: var(--cor-marca-clara); }
+.sugestao-aviso { padding: 10px 12px; color: var(--cor-suave); font-size: .9rem; }
