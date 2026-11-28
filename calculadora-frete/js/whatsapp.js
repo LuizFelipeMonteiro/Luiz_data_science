@@ -44,25 +44,40 @@
     return linhas.join("\n");
   }
 
+  function km(valor) { return String(valor).replace(".", ","); }
+
   /**
    * @param {Object} d
-   *   retirada, entrega: { titulo, rua, bairro, cidade, nomeLocal, numero, complemento, placeId }
-   *   km, valorTexto, tipo (ex.: "entrega avulsa"), cargaEspecial (bool), parceiro (texto ou null)
+   *   retirada: { titulo, rua, bairro, cidade, nomeLocal, numero, complemento, placeId }
+   *   entregas: [ { (mesmos campos do endereço), km, valorTexto, obs } ]   ← uma ou várias
+   *   totalTexto, tipo (ex.: "entrega avulsa", "3 entregas agrupadas"),
+   *   cargaEspecial (bool), parceiro (texto ou null),
    *   data ("AAAA-MM-DD"), horario ("HH:MM"), oQue (texto)
    */
   function montarMensagem(d, config) {
     var aCombinar = "(a combinar)";
+    var especial = d.cargaEspecial ? "\nCarga especial: sim" : "";
     var partes = [
       "*Pedido de entrega – " + config.empresa.nome + "*" + (d.parceiro ? "\nCliente: " + d.parceiro : ""),
       blocoEndereco("Retirada", d.retirada),
-      blocoEndereco("Entrega", d.entrega),
-      "Distância: " + String(d.km).replace(".", ",") + " km\n" +
-        "Valor: " + d.valorTexto + (d.tipo ? " (" + d.tipo + ")" : "") +
-        (d.cargaEspecial ? "\nCarga especial: sim" : ""),
-      "Data: " + (formatarData(d.data) || aCombinar) + "\n" +
-        "Horário: " + (d.horario || aCombinar) + "\n" +
-        "O que vai ser entregue: " + (d.oQue || aCombinar),
     ];
+
+    if (d.entregas.length === 1) {
+      var e = d.entregas[0];
+      partes.push(blocoEndereco("Entrega", e));
+      partes.push("Distância: " + km(e.km) + " km\n" +
+        "Valor: " + d.totalTexto + (d.tipo ? " (" + d.tipo + ")" : "") + especial);
+    } else {
+      d.entregas.forEach(function (e, i) {
+        partes.push(blocoEndereco("Entrega " + (i + 1), e) + "\n" +
+          km(e.km) + " km · " + e.valorTexto + (e.obs ? " (" + e.obs + ")" : ""));
+      });
+      partes.push("*Total: " + d.totalTexto + "*" + (d.tipo ? " (" + d.tipo + ")" : "") + especial);
+    }
+
+    partes.push("Data: " + (formatarData(d.data) || aCombinar) + "\n" +
+      "Horário: " + (d.horario || aCombinar) + "\n" +
+      "O que vai ser entregue: " + (d.oQue || aCombinar));
     return partes.join("\n\n");
   }
 

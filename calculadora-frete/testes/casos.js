@@ -4,6 +4,7 @@
  * vermelhos. É o esperado: atualize o "esperado" aqui também.
  *
  * Campos: km, dentro (true = dentro de PG), modalidade, especial, esperado (R$)
+ * Pedido com várias entregas: grupo: [{ km, dentro }, ...] e esperado = total.
  */
 (function (global) {
   var casos = [
@@ -34,6 +35,14 @@
     { km: 4,    dentro: true,  modalidade: "avulsa",   parceiro: "cliente-a", esperado: 20.00, obs: "tabela daria 18 → mínimo 20" },
     { km: 6,    dentro: true,  modalidade: "avulsa",   parceiro: "cliente-a", esperado: 22.00, obs: "acima do mínimo, segue a tabela" },
     { km: 10,   dentro: true,  modalidade: "avulsa",   parceiro: "cliente-a", esperado: 40.00 },
+
+    // ---- Pedidos com VÁRIAS entregas (cada uma pela distância da retirada até ela) ----
+    { grupo: [{ km: 2, dentro: true }],                                         esperado: 15.00, obs: "1 entrega só = tabela avulsa" },
+    { grupo: [{ km: 2, dentro: true }, { km: 4, dentro: true }],                esperado: 26.00, obs: "agrupada: 12 + 14" },
+    { grupo: [{ km: 2, dentro: true }, { km: 4, dentro: true }, { km: 6.5, dentro: true }], esperado: 43.00, obs: "agrupada: 12 + 14 + 17" },
+    { grupo: [{ km: 2, dentro: true }, { km: 10, dentro: true }],               esperado: 52.00, obs: "agrupada: 12 + (10 km × 4,00)" },
+    { grupo: [{ km: 2, dentro: true }, { km: 20, dentro: false }],              esperado: 112.00, obs: "a de fora de PG segue a regra de fora: 12 + 100" },
+    { grupo: [{ km: 2, dentro: true }, { km: 4, dentro: true }], parceiro: "cliente-a", esperado: 40.00, obs: "cliente só avulsa: 20 + 20 (mínimo dela)" },
 
     // ---- Carga especial (testada com a opção LIGADA, mesmo que esteja desligada no config) ----
     { km: 4,    dentro: true,  modalidade: "avulsa",   especial: { tipo: "fixo", valor: 5 },        esperado: 23.00 },

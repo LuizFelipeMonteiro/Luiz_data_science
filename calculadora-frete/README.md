@@ -30,6 +30,19 @@ Regras para editar sem quebrar: centavos com **ponto** (`2.50`), vírgula no fim
 de cada linha, textos entre aspas. Depois de salvar, abra o **`testes.html`**:
 ele confere a tabela **e** aponta erros de digitação no `config.js`/`parceiros.js`.
 
+## Uma ou várias entregas
+
+O cliente informa a retirada e quantas entregas quiser (até `maxEntregas`, no
+`config.js`), com o botão **"+ Adicionar outra entrega"**.
+
+- Cada entrega paga pela distância **da retirada até ela** (não depende da ordem).
+- **1 entrega** → tabela avulsa. **2 ou mais** → tabela agrupada para cada uma.
+  Não existe escolha manual: ninguém pega o desconto com uma entrega só.
+- Cliente com `modalidadesPermitidas: ["avulsa"]` (ex.: `cliente-a`) paga
+  avulsa em cada entrega, mesmo com várias.
+- Entrega fora da cidade segue a regra de fora da cidade, mesmo dentro de um grupo.
+- A mensagem do WhatsApp lista cada entrega (endereço, mapa, km e valor) e o total.
+
 ## Link de cada cliente
 
 `index.html?parceiro=CODIGO` usa as condições do cliente cadastrado em
@@ -90,6 +103,7 @@ coordenadas). Os endereços vão ao Google/OpenStreetMap só para calcular a rot
 - [x] 4. Distância de carro + dentro/fora de PG
 - [x] 5. Número/complemento + "Agendar pelo WhatsApp" (mensagem pronta com link do mapa)
 - [x] Revisão geral (11/2026)
+- [x] Várias entregas no mesmo pedido (agrupada automática a partir de 2)
 - [ ] 6. Publicar, travar a chave do Google no endereço do site e gerar o link da cliente
 - [ ] 7. Logo, ícone para "Adicionar à tela inicial" e ajustes finos
 

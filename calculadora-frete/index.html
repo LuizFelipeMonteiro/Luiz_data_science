@@ -27,14 +27,6 @@
     <section class="cartao">
       <h2>Calcule o valor da entrega</h2>
 
-      <!-- ========== TIPO DE ENTREGA ========== -->
-      <fieldset class="grupo">
-        <legend>Tipo de entrega</legend>
-        <div class="opcoes" id="opcoes-modalidade">
-          <!-- As opções são criadas a partir do config.js -->
-        </div>
-      </fieldset>
-
       <!-- ========== ENDEREÇOS ========== -->
       <fieldset class="grupo">
         <legend>Endereços</legend>
@@ -52,21 +44,32 @@
           </div>
         </div>
 
-        <div class="bloco-endereco">
+        <!-- As entregas (uma ou várias) são criadas pelo app.js a partir do modelo abaixo -->
+        <div id="lista-entregas"></div>
+
+        <button type="button" class="botao-adicionar" id="adicionar-entrega">+ Adicionar outra entrega</button>
+        <p class="dica" id="dica-entregas"></p>
+        <p class="dica">Digite o nome da rua e escolha na lista. Sem número? Escreva "S/N".</p>
+      </fieldset>
+
+      <!-- Modelo de UMA entrega (o app.js copia este bloco para cada entrega) -->
+      <template id="modelo-entrega">
+        <div class="bloco-endereco bloco-entrega">
+          <div class="cabecalho-entrega">
+            <label class="titulo-entrega">Entrega</label>
+            <button type="button" class="remover-entrega">Remover</button>
+          </div>
           <div class="campo campo-endereco">
-            <label for="entrega">Entrega</label>
-            <input id="entrega" type="text" placeholder="Digite a rua ou o local" autocomplete="off" autocapitalize="words" enterkeyhint="next">
+            <input class="endereco" type="text" placeholder="Digite a rua ou o local" autocomplete="off" autocapitalize="words" enterkeyhint="next">
           </div>
           <div class="linha-numero">
             <label class="campo campo-numero"><span>Nº *</span>
-              <input id="entrega-numero" type="text" inputmode="text" autocomplete="off" maxlength="12"></label>
+              <input class="numero" type="text" inputmode="text" autocomplete="off" maxlength="12"></label>
             <label class="campo campo-compl"><span>Complemento / referência</span>
-              <input id="entrega-complemento" type="text" placeholder="Ex.: apto 302" autocomplete="off" maxlength="80"></label>
+              <input class="complemento" type="text" placeholder="Ex.: apto 302, Maria" autocomplete="off" maxlength="80"></label>
           </div>
         </div>
-
-        <p class="dica">Digite o nome da rua e escolha na lista. Sem número? Escreva "S/N".</p>
-      </fieldset>
+      </template>
 
       <!-- ========== CARGA ESPECIAL (só aparece se ativada no config) ========== -->
       <label class="marcar" id="bloco-especial" hidden>
@@ -76,11 +79,12 @@
 
       <!-- ========== RESULTADO ========== -->
       <div class="resultado" id="resultado" aria-live="polite">
-        <p class="resultado-vazio" id="resultado-vazio">Escolha os dois endereços para ver o valor.</p>
+        <p class="resultado-vazio" id="resultado-vazio">Escolha a retirada e a entrega para ver o valor.</p>
         <div id="resultado-cheio" hidden>
-          <p class="resultado-rotulo">Valor da entrega</p>
+          <p class="resultado-rotulo" id="resultado-rotulo">Valor da entrega</p>
           <p class="resultado-valor" id="valor">R$ 0,00</p>
           <p class="resultado-detalhe" id="detalhe"></p>
+          <ul class="lista-valores" id="lista-valores" hidden></ul>
         </div>
         <p class="erro" id="erro" hidden></p>
       </div>

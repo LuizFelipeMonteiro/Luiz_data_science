@@ -84,12 +84,54 @@
     return { valor: arredondar(valor, 2), kmConsiderado: km, regra: regra };
   }
 
+  /** Este cliente pode usar a tabela agrupada? (ver modalidadesPermitidas no parceiros.js) */
+  function podeAgrupar(config) {
+    var modalidades = config.dentroDaCidade.modalidades;
+    var permitidas = config.modalidadesPermitidas || Object.keys(modalidades);
+    return !!modalidades.agrupada && permitidas.indexOf("agrupada") >= 0;
+  }
+
+  /**
+   * Calcula um pedido com UMA OU VÁRIAS entregas saindo da mesma retirada.
+   *
+   * Regras (combinadas com o Luiz):
+   *  - Cada entrega paga pela distância da RETIRADA até ela.
+   *  - 1 entrega → tabela "avulsa".
+   *  - 2 ou mais entregas no mesmo trajeto → tabela "agrupada" para cada uma
+   *    (se o cliente puder usar a agrupada; ver modalidadesPermitidas no parceiros.js).
+   *  - Entrega fora da cidade segue a regra de fora da cidade.
+   *
+   * @param {Object} pedido
+   * @param {Array<{distanciaKm:number, dentroDaCidade:boolean}>} pedido.entregas
+   * @param {boolean} [pedido.cargaEspecial]
+   * @returns {{modalidade:string, itens:Array, total:number}}
+   */
+  function calcularPedido(pedido, config) {
+    var entregas = pedido.entregas || [];
+    if (!entregas.length) throw new Error("Pedido sem entregas");
+
+    var modalidade = entregas.length >= 2 && podeAgrupar(config) ? "agrupada" : "avulsa";
+
+    var itens = entregas.map(function (e) {
+      var r = calcularFrete({
+        distanciaKm: e.distanciaKm,
+        dentroDaCidade: e.dentroDaCidade,
+        modalidade: modalidade,
+        cargaEspecial: pedido.cargaEspecial,
+      }, config);
+      r.dentroDaCidade = !!e.dentroDaCidade;
+      return r;
+    });
+    var total = itens.reduce(function (soma, r) { return soma + r.valor; }, 0);
+    return { modalidade: modalidade, itens: itens, total: arredondar(total, 2) };
+  }
+
   /** Formata 29.5 como "R$ 29,50". */
   function formatarReais(valor) {
     return "R$ " + valor.toFixed(2).replace(".", ",");
   }
 
-  var api = { calcularFrete: calcularFrete, formatarReais: formatarReais };
+  var api = { calcularFrete: calcularFrete, calcularPedido: calcularPedido, podeAgrupar: podeAgrupar, formatarReais: formatarReais };
 
   // Disponível na página como LFM.precos.calcularFrete(...)
   global.LFM = global.LFM || {};

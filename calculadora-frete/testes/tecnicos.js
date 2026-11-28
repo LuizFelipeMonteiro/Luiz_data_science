@@ -30,14 +30,26 @@ var CFG = global.LFM_CONFIG;
   var ret = { rua: "Rua Balduíno Taques", numero: "500", bairro: "Centro", cidade: "Ponta Grossa", complemento: "casa amarela" };
   var ent = { rua: "Avenida General Carlos Cavalcanti", numero: "4748", bairro: "Uvaranas", cidade: "Ponta Grossa",
               nomeLocal: "Floricultura X", placeId: "ChIJ123", numeroGoogle: "4748" };
-  var msg = whatsapp.montarMensagem({ retirada: ret, entrega: ent, km: 7.3, valorTexto: "R$ 29,20",
-    tipo: "entrega avulsa", parceiro: "Cliente A", data: "2026-12-05", horario: "14:30", oQue: "" }, CFG);
+  var msg = whatsapp.montarMensagem({ retirada: ret, entregas: [Object.assign({ km: 7.3, valorTexto: "R$ 29,20" }, ent)],
+    totalTexto: "R$ 29,20", tipo: "entrega avulsa", parceiro: "Cliente A", data: "2026-12-05", horario: "14:30", oQue: "" }, CFG);
   ok(msg.indexOf("*Retirada:* Rua Balduíno Taques, 500 – Centro, Ponta Grossa") >= 0, "mensagem: endereço de retirada completo");
   ok(msg.indexOf("*Entrega:* Floricultura X – Avenida General Carlos Cavalcanti, 4748 – Uvaranas, Ponta Grossa") >= 0, "mensagem: nome da loja na entrega");
   ok(msg.indexOf("Complemento: casa amarela") >= 0, "mensagem: complemento");
   ok(msg.indexOf("Valor: R$ 29,20 (entrega avulsa)") >= 0, "mensagem: valor e tipo");
   ok(msg.indexOf("Cliente: Cliente A") >= 0, "mensagem: nome do parceiro");
   ok(msg.indexOf("Data: 05/12/2026") >= 0 && msg.indexOf("O que vai ser entregue: (a combinar)") >= 0, "mensagem: data formatada e campo vazio 'a combinar'");
+
+  // Pedido com 3 entregas (uma fora da cidade)
+  var e2 = { rua: "Rua Ermelino de Leão", numero: "10", bairro: "Olarias", cidade: "Ponta Grossa", km: 2.1, valorTexto: "R$ 12,00" };
+  var e3 = { rua: "Rua X", numero: "5", cidade: "Carambeí", km: 20, valorTexto: "R$ 100,00", obs: "fora de Ponta Grossa, ida e volta" };
+  var grupo = whatsapp.montarMensagem({ retirada: ret,
+    entregas: [Object.assign({ km: 4, valorTexto: "R$ 14,00" }, ent), e2, e3],
+    totalTexto: "R$ 126,00", tipo: "3 entregas agrupadas" }, CFG);
+  ok(grupo.indexOf("*Entrega 1:* Floricultura X") >= 0 && grupo.indexOf("*Entrega 2:* Rua Ermelino de Leão, 10") >= 0 &&
+     grupo.indexOf("*Entrega 3:* Rua X, 5 – Carambeí") >= 0, "mensagem com várias entregas: numera cada uma");
+  ok(grupo.indexOf("2,1 km · R$ 12,00") >= 0 && grupo.indexOf("20 km · R$ 100,00 (fora de Ponta Grossa, ida e volta)") >= 0,
+     "mensagem com várias entregas: distância e valor de cada uma");
+  ok(grupo.indexOf("*Total: R$ 126,00* (3 entregas agrupadas)") >= 0, "mensagem com várias entregas: total");
 
   ok(whatsapp.linkMapa(ent).indexOf("query_place_id=ChIJ123") > 0, "mapa: usa o código do local do Google");
   ok(whatsapp.linkMapa(Object.assign({}, ent, { numero: "100" })).indexOf("query_place_id") < 0, "mapa: número trocado à mão → não usa o código do local");
@@ -54,6 +66,19 @@ var CFG = global.LFM_CONFIG;
   ok(!parceiro.montarConfig(CFG, global.LFM_PARCEIROS, "nao-existe").parceiroAtivo, "parceiro: código desconhecido → tabela padrão");
   ok(!parceiro.montarConfig(CFG, global.LFM_PARCEIROS, "__proto__").parceiroAtivo &&
      !parceiro.montarConfig(CFG, global.LFM_PARCEIROS, "constructor").parceiroAtivo, "parceiro: códigos esquisitos no link são ignorados");
+})();
+
+// ---------------- Pedido com várias entregas ----------------
+(function () {
+  var c = parceiro.montarConfig(CFG, global.LFM_PARCEIROS, "cliente-a");
+  ok(precos.podeAgrupar(CFG) && !precos.podeAgrupar(c), "agrupar: padrão pode, cliente só-avulsa não pode");
+  var um = precos.calcularPedido({ entregas: [{ distanciaKm: 4, dentroDaCidade: true }] }, CFG);
+  var dois = precos.calcularPedido({ entregas: [{ distanciaKm: 4, dentroDaCidade: true }, { distanciaKm: 4, dentroDaCidade: true }] }, CFG);
+  ok(um.modalidade === "avulsa" && um.total === 18 && dois.modalidade === "agrupada" && dois.total === 28,
+     "agrupar: 1 entrega avulsa (18), 2 entregas agrupadas (14 + 14)");
+  var erro = false;
+  try { precos.calcularPedido({ entregas: [] }, CFG); } catch (e) { erro = true; }
+  ok(erro, "pedido sem entregas é recusado");
 })();
 
 // ---------------- Preço: entradas inválidas ----------------

@@ -39,7 +39,7 @@ window.LFM_CONFIG = {
           { ate: 7, valor: 22.00 },
         ],
       },
-      agrupada: {
+      agrupada: {                     // usada sozinha quando o pedido tem 2 ou mais entregas
         rotulo: "Entregas agrupadas (várias no mesmo trajeto)",
         faixas: [
           { ate: 3, valor: 12.00 },
@@ -63,6 +63,11 @@ window.LFM_CONFIG = {
     idaEVolta: true,      // true = cobra a distância 2 vezes (ida + volta)
     valorMinimo: 0,       // ex.: 30.00 para nunca cobrar menos que R$ 30
   },
+
+  // ---------- Várias entregas no mesmo trajeto ----------
+  // 1 entrega = tabela "avulsa". 2 ou mais = tabela "agrupada" para cada uma,
+  // pela distância da retirada até cada entrega.
+  maxEntregas: 10,                    // máximo de entregas num pedido
 
   // ---------- Valor mínimo de qualquer entrega ----------
   // 0 = sem mínimo. Clientes parceiros podem ter um mínimo próprio (veja parceiros.js).

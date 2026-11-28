@@ -36,6 +36,13 @@
 
     // Tabela dentro da cidade
     var mods = (cfg.dentroDaCidade && cfg.dentroDaCidade.modalidades) || {};
+    if (!mods.avulsa) aviso('dentroDaCidade.modalidades: precisa ter a tabela "avulsa" (é a usada para 1 entrega).');
+
+    // Várias entregas
+    var max = cfg.maxEntregas;
+    if (!(typeof max === "number" && max >= 1 && max <= 20 && Math.floor(max) === max)) {
+      aviso("maxEntregas: use um número inteiro de 1 a 20.");
+    }
     Object.keys(mods).forEach(function (nome) {
       var faixas = mods[nome].faixas || [];
       if (!faixas.length) aviso("Modalidade " + nome + ": não tem nenhuma faixa de preço.");

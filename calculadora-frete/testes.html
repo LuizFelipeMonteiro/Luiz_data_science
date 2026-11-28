@@ -90,10 +90,11 @@
       res.forEach(function (t) {
         var c = t.caso, tr = document.createElement("tr");
         tr.className = t.ok ? "ok" : "falha";
-        var tipo = c.modalidade + (c.especial ? " + especial (" + (c.especial.tipo === "fixo" ? "+" + f(c.especial.valor) : "+" + c.especial.valor + "%") + ")" : "");
+        var d = LFM.descreverCaso(c);
+        var tipo = d.tipo + (c.especial ? " + especial (" + (c.especial.tipo === "fixo" ? "+" + f(c.especial.valor) : "+" + c.especial.valor + "%") + ")" : "");
         [ t.ok ? "✓ certo" : "✗ errado",
-          String(c.km).replace(".", ",") + " km",
-          (c.dentro ? "Ponta Grossa" : "Fora de PG") + (c.parceiro ? " · " + c.parceiro : ""),
+          d.distancia,
+          d.onde + (c.parceiro ? " · " + c.parceiro : ""),
           tipo, f(c.esperado), f(t.resultado.valor), t.resultado.regra, c.obs || ""
         ].forEach(function (txt, i) {
           var td = document.createElement("td");
