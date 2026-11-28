@@ -127,6 +127,7 @@
             lon: d.location.longitude,
             rua: parte(c, "route"),
             numero: parte(c, "street_number"),
+            numeroGoogle: parte(c, "street_number"),   // para saber se a pessoa trocou o número depois
             bairro: parte(c, "sublocality_level_1") || parte(c, "sublocality") || parte(c, "neighborhood"),
             cidade: parte(c, "locality") || parte(c, "administrative_area_level_2"),
             nomeLocal: item.ehEstabelecimento ? item.titulo : "",

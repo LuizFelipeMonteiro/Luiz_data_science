@@ -22,7 +22,13 @@
   function linkMapa(e) {
     var rua = e.rua || e.titulo;
     var busca = [rua + (e.numero ? ", " + e.numero : ""), e.bairro, e.cidade, "PR"].filter(Boolean).join(", ");
-    return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(busca);
+    var link = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(busca);
+    // Endereço vindo do Google: manda também o código do local, para o GPS abrir no ponto exato.
+    // Só se a pessoa não trocou o número que o Google encontrou.
+    if (e.placeId && (!e.numeroGoogle || e.numero === e.numeroGoogle)) {
+      link += "&query_place_id=" + encodeURIComponent(e.placeId);
+    }
+    return link;
   }
 
   function formatarData(iso) {           // "2026-12-05" → "05/12/2026"
