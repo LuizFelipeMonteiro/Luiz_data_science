@@ -33,6 +33,8 @@
   </div>
 
   <script src="config.js"></script>
+  <script src="parceiros.js"></script>
+  <script src="js/parceiro.js"></script>
   <script src="js/precos.js"></script>
   <script src="testes/casos.js"></script>
   <script src="testes/rodar-testes.js"></script>
@@ -54,7 +56,7 @@
         var tipo = c.modalidade + (c.especial ? " + especial (" + (c.especial.tipo === "fixo" ? "+" + f(c.especial.valor) : "+" + c.especial.valor + "%") + ")" : "");
         [ t.ok ? "✓ certo" : "✗ errado",
           String(c.km).replace(".", ",") + " km",
-          c.dentro ? "Ponta Grossa" : "Fora de PG",
+          (c.dentro ? "Ponta Grossa" : "Fora de PG") + (c.parceiro ? " · " + c.parceiro : ""),
           tipo, f(c.esperado), f(t.resultado.valor), t.resultado.regra, c.obs || ""
         ].forEach(function (txt, i) {
           var td = document.createElement("td");

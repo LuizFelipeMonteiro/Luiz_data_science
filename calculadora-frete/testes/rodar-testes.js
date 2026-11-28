@@ -6,7 +6,9 @@
   function rodarTestes(config, precos, casos) {
     return casos.map(function (c) {
       // Copia o config para poder ligar a carga especial só no teste.
-      var cfg = JSON.parse(JSON.stringify(config));
+      var cfg = c.parceiro
+        ? global.LFM.parceiro.montarConfig(config, global.LFM_PARCEIROS, c.parceiro)
+        : JSON.parse(JSON.stringify(config));
       if (c.especial) {
         cfg.cargaEspecial = Object.assign({}, cfg.cargaEspecial, c.especial, { ativo: true });
       }
@@ -25,6 +27,8 @@
   if (typeof require !== "undefined" && typeof module !== "undefined" && require.main === module) {
     global.window = global; // o config.js escreve em "window", que no terminal não existe
     require("../config.js");
+    require("../parceiros.js");
+    require("../js/parceiro.js");
     var precos = require("../js/precos.js");
     var casos = require("./casos.js");
     var res = rodarTestes(global.LFM_CONFIG, precos, casos);

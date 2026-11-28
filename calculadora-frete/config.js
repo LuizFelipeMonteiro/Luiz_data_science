@@ -63,6 +63,10 @@ window.LFM_CONFIG = {
     valorMinimo: 0,       // ex.: 30.00 para nunca cobrar menos que R$ 30
   },
 
+  // ---------- Valor mínimo de qualquer entrega ----------
+  // 0 = sem mínimo. Clientes parceiros podem ter um mínimo próprio (veja parceiros.js).
+  valorMinimoEntrega: 0,
+
   // ---------- Carga especial (bolo, item frágil, horário exato) ----------
   cargaEspecial: {
     ativo: false,                     // mude para true para mostrar a opção na página

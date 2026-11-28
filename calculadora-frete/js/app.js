@@ -10,7 +10,9 @@
 (function () {
   "use strict";
 
-  var config = window.LFM_CONFIG;
+  // Lê o código do parceiro no link (ex.: index.html?parceiro=cliente-a)
+  var codigoParceiro = new URLSearchParams(window.location.search).get("parceiro");
+  var config = window.LFM.parceiro.montarConfig(window.LFM_CONFIG, window.LFM_PARCEIROS, codigoParceiro);
   var precos = window.LFM.precos;
 
   // Atalho: pega um elemento da página pelo id
@@ -34,7 +36,10 @@
   function montarModalidades() {
     var caixa = el("opcoes-modalidade");
     var modalidades = config.dentroDaCidade.modalidades;
-    Object.keys(modalidades).forEach(function (chave, i) {
+    var permitidas = config.modalidadesPermitidas || Object.keys(modalidades);
+    // Só uma opção possível (ex.: cliente sempre avulsa) → nem mostra a escolha
+    if (permitidas.length === 1) caixa.closest("fieldset").hidden = true;
+    permitidas.forEach(function (chave, i) {
       var faixas = modalidades[chave].faixas;
       var label = document.createElement("label");
       label.className = "opcao";
@@ -44,7 +49,8 @@
       var span = label.querySelector("span");
       span.textContent = modalidades[chave].rotulo;
       var dica = document.createElement("small");
-      dica.textContent = "a partir de " + precos.formatarReais(faixas[0].valor);
+      dica.textContent = "a partir de " +
+        precos.formatarReais(Math.max(faixas[0].valor, config.valorMinimoEntrega || 0));
       span.appendChild(dica);
       caixa.appendChild(label);
     });

@@ -66,6 +66,11 @@
       regra = "Fora da cidade: " + kmCobrado + " km" + (fora.idaEVolta ? " (ida e volta)" : "");
     }
 
+    if (config.valorMinimoEntrega && valor < config.valorMinimoEntrega) {
+      valor = config.valorMinimoEntrega;
+      regra += " → valor mínimo";
+    }
+
     var especial = config.cargaEspecial;
     if (pedido.cargaEspecial && especial && especial.ativo) {
       if (especial.tipo === "percentual") {

@@ -29,6 +29,12 @@
     { km: 20,   dentro: false, modalidade: "avulsa",   esperado: 100.00, obs: "20 km × 2 × 2,50" },
     { km: 12.3, dentro: false, modalidade: "avulsa",   esperado: 61.50 },
 
+    // ---- Parceira "cliente-a" (mínimo R$ 20, só avulsa) ----
+    { km: 2,    dentro: true,  modalidade: "avulsa",   parceiro: "cliente-a", esperado: 20.00, obs: "tabela daria 15 → mínimo 20" },
+    { km: 4,    dentro: true,  modalidade: "avulsa",   parceiro: "cliente-a", esperado: 20.00, obs: "tabela daria 18 → mínimo 20" },
+    { km: 6,    dentro: true,  modalidade: "avulsa",   parceiro: "cliente-a", esperado: 22.00, obs: "acima do mínimo, segue a tabela" },
+    { km: 10,   dentro: true,  modalidade: "avulsa",   parceiro: "cliente-a", esperado: 40.00 },
+
     // ---- Carga especial (testada com a opção LIGADA, mesmo que esteja desligada no config) ----
     { km: 4,    dentro: true,  modalidade: "avulsa",   especial: { tipo: "fixo", valor: 5 },        esperado: 23.00 },
     { km: 4,    dentro: true,  modalidade: "avulsa",   especial: { tipo: "percentual", valor: 20 }, esperado: 21.60 },
