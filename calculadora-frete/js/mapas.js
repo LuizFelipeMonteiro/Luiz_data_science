@@ -258,12 +258,62 @@
     return typeof chave === "string" && chave.length > 20 && chave.indexOf("COLE_") !== 0;
   }
 
+  /*
+   * Plano B: usa o Google; se ele falhar (conta pausada, limite diário,
+   * Google fora do ar), troca para o gratuito e continua dali em diante.
+   * O cliente nunca fica sem calculadora.
+   */
+  function motorComReserva(principal, reserva) {
+    var motor = { nome: principal.nome };
+    var usandoReserva = false;
+
+    function trocar(erro) {
+      if (usandoReserva) return;
+      usandoReserva = true;
+      motor.nome = reserva.nome;
+      console.warn("Google indisponível – usando o mapa gratuito.", erro);
+    }
+    function deveTrocar(erro) { return !usandoReserva && !(erro && erro.name === "AbortError"); }
+
+    motor.buscar = function (texto, sinal, sessao) {
+      if (usandoReserva) return reserva.buscar(texto, sinal, sessao);
+      return principal.buscar(texto, sinal, sessao).catch(function (erro) {
+        if (!deveTrocar(erro)) throw erro;
+        trocar(erro);
+        return reserva.buscar(texto, sinal, sessao);      // já tenta de novo pelo gratuito
+      });
+    };
+
+    motor.detalhar = function (item, sessao) {
+      if (!item.placeId) return reserva.detalhar(item, sessao);   // sugestão do gratuito
+      return principal.detalhar(item, sessao).catch(function (erro) {
+        if (deveTrocar(erro)) trocar(erro);
+        var e = new Error("Google falhou ao detalhar; digite o endereço de novo");
+        e.digitarDeNovo = true;
+        throw e;
+      });
+    };
+
+    // A rota só precisa das coordenadas, então serve para endereços de qualquer motor
+    motor.rota = function (origem, destino) {
+      if (usandoReserva) return reserva.rota(origem, destino);
+      return principal.rota(origem, destino).catch(function (erro) {
+        if (!deveTrocar(erro)) throw erro;
+        trocar(erro);
+        return reserva.rota(origem, destino);
+      });
+    };
+
+    return motor;
+  }
+
   function criar(cfg, chaves) {
+    var gratis = motorGratis(cfg, chaves.ors);
     if (cfg.provedor === "google") {
-      if (chavePreenchida(chaves.google)) return motorGoogle(cfg, chaves.google);
+      if (chavePreenchida(chaves.google)) return motorComReserva(motorGoogle(cfg, chaves.google), gratis);
       console.warn("Chave do Google não encontrada no chave.js – usando o mapa gratuito.");
     }
-    return motorGratis(cfg, chaves.ors);
+    return gratis;
   }
 
   global.LFM = global.LFM || {};

@@ -53,10 +53,12 @@
         li.addEventListener("mousedown", function (e) { e.preventDefault(); escolher(i); });
         lista.appendChild(li);
       });
-      if (opcoes.rodape) {                 // crédito exigido pelo provedor (ex.: Google)
+      // crédito exigido pelo provedor (ex.: Google); pode mudar se o motor trocar
+      var textoRodape = typeof opcoes.rodape === "function" ? opcoes.rodape() : opcoes.rodape;
+      if (textoRodape) {
         var rod = document.createElement("li");
         rod.className = "sugestao-rodape";
-        rod.textContent = opcoes.rodape;
+        rod.textContent = textoRodape;
         lista.appendChild(rod);
       }
       lista.hidden = false;

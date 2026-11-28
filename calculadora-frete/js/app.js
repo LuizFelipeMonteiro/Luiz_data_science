@@ -102,7 +102,7 @@
 
     return LFM.autocompletar(el(id), {
       buscar: function (texto, sinal) { return motor.buscar(texto, sinal, sessao); },
-      rodape: motor.nome === "google" ? "Endereços por Google" : "",
+      rodape: function () { return motor.nome === "google" ? "Endereços por Google" : ""; },
       aoEscolher: function (item) {
         var minhaVersao = ++versao;
         if (!item) { aoDefinir(null); return; }
@@ -119,7 +119,9 @@
           .catch(function (erro) {
             if (minhaVersao !== versao) return;
             console.error("Erro ao detalhar endereço:", erro);
-            mostrar("erro", "Não conseguimos localizar esse endereço agora. Tente de novo ou chame a LFM no WhatsApp.");
+            mostrar("erro", erro.digitarDeNovo
+              ? "Não conseguimos localizar esse endereço. Apague e digite de novo, por favor."
+              : "Não conseguimos localizar esse endereço agora. Tente de novo ou chame a LFM no WhatsApp.");
           });
       },
     });
