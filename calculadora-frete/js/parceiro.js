@@ -30,6 +30,7 @@
     if (!p) return mesclar(configBase, {});
     var cfg = mesclar(configBase, p.ajustes);
     cfg.parceiroAtivo = codigo;
+    cfg.parceiroNome = p.nome || codigo;
     return cfg;
   }
 

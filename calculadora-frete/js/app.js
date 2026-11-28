@@ -15,9 +15,10 @@
   var config = window.LFM.parceiro.montarConfig(window.LFM_CONFIG, window.LFM_PARCEIROS, codigoParceiro);
   var precos = window.LFM.precos;
   var mapas = window.LFM.mapas;
+  var whatsapp = window.LFM.whatsapp;
 
   // O que já foi escolhido na tela
-  var estado = { retirada: null, entrega: null, rota: null };
+  var estado = { retirada: null, entrega: null, rota: null, resultado: null };
   var calculoAtual = 0;   // evita mostrar resultado velho se a pessoa trocar o endereço no meio
 
   function el(id) { return document.getElementById(id); }
@@ -72,12 +73,18 @@
 
   // ---------- 2. Endereços ----------
 
-  // O celular lembra a última retirada (fica só no aparelho de quem usa)
+  // O celular lembra a última retirada, com número e complemento
+  // (fica só no aparelho de quem usa; nada vai para a LFM)
   var CHAVE_SALVA = "lfm.retirada";
   function lerRetiradaSalva() {
     try { return JSON.parse(localStorage.getItem(CHAVE_SALVA)); } catch (e) { return null; }
   }
-  function salvarRetirada(item) {
+  function salvarRetirada() {
+    if (!config.mapas.lembrarRetirada || !estado.retirada) return;
+    var item = Object.assign({}, estado.retirada, {
+      numero: el("retirada-numero").value.trim(),
+      complemento: el("retirada-complemento").value.trim(),
+    });
     try { localStorage.setItem(CHAVE_SALVA, JSON.stringify(item)); } catch (e) { /* sem problema */ }
   }
 
@@ -88,9 +95,9 @@
       buscar: buscar,
       aoEscolher: function (item) {
         estado.retirada = item;
-        if (item && config.mapas.lembrarRetirada) salvarRetirada(item);
+        salvarRetirada();
         aoMudarEndereco();
-        if (item && !estado.entrega) el("entrega").focus();
+        if (item) el("retirada-numero").focus();   // próximo passo: o número
       },
     });
     LFM.autocompletar(el("entrega"), {
@@ -98,12 +105,21 @@
       aoEscolher: function (item) {
         estado.entrega = item;
         aoMudarEndereco();
-        if (item) el("entrega").blur();   // fecha o teclado do celular para mostrar o valor
+        if (item) el("entrega-numero").focus();
       },
     });
 
     var salva = config.mapas.lembrarRetirada && lerRetiradaSalva();
-    if (salva && salva.lat) campoRetirada.definir(salva);
+    if (salva && salva.lat) {
+      el("retirada-numero").value = salva.numero || "";
+      el("retirada-complemento").value = salva.complemento || "";
+      campoRetirada.definir(salva);
+    }
+
+    // Número e complemento da retirada também ficam lembrados
+    ["retirada-numero", "retirada-complemento"].forEach(function (id) {
+      el(id).addEventListener("input", salvarRetirada);
+    });
   }
 
   // ---------- 3. Rota ----------
@@ -145,6 +161,8 @@
       cargaEspecial: el("especial").checked,
     }, config);
 
+    estado.resultado = resultado;
+    estado.dentro = dentro;
     el("valor").textContent = precos.formatarReais(resultado.valor);
     el("detalhe").textContent =
       String(resultado.kmConsiderado).replace(".", ",") + " km de carro · cerca de " +
@@ -162,12 +180,84 @@
     el("resultado-cheio").hidden = qual !== "valor";
     el("erro").hidden = qual !== "erro";
     if (qual === "erro") el("erro").textContent = mensagem;
+    if (qual !== "valor") estado.resultado = null;
+    el("agendar").hidden = qual !== "valor";
+    atualizarBotao();
+  }
+
+  // ---------- 5. Agendar pelo WhatsApp ----------
+  var obrigatorios = [
+    { id: "retirada-numero", nome: "o número da retirada" },
+    { id: "entrega-numero",  nome: "o número da entrega" },
+  ];
+
+  function camposFaltando() {
+    return obrigatorios.filter(function (c) { return !el(c.id).value.trim(); });
+  }
+
+  function atualizarBotao() {
+    var botao = el("botao-whatsapp");
+    if (!estado.resultado) { botao.setAttribute("aria-disabled", "true"); botao.href = "#"; return; }
+
+    var faltando = camposFaltando();
+    obrigatorios.forEach(function (c) {           // tira o vermelho de quem já foi preenchido
+      if (el(c.id).value.trim()) el(c.id).classList.remove("faltando");
+    });
+    if (!faltando.length) el("aviso-falta").hidden = true;
+    botao.setAttribute("aria-disabled", faltando.length ? "true" : "false");
+
+    var modalidade = valorMarcado("modalidade");
+    var texto = whatsapp.montarMensagem({
+      retirada: Object.assign({}, estado.retirada, {
+        numero: el("retirada-numero").value.trim(),
+        complemento: el("retirada-complemento").value.trim(),
+      }),
+      entrega: Object.assign({}, estado.entrega, {
+        numero: el("entrega-numero").value.trim(),
+        complemento: el("entrega-complemento").value.trim(),
+      }),
+      km: estado.resultado.kmConsiderado,
+      valorTexto: precos.formatarReais(estado.resultado.valor),
+      modalidadeRotulo: estado.dentro ? config.dentroDaCidade.modalidades[modalidade].rotulo : "",
+      cargaEspecial: el("especial").checked,
+      parceiro: config.parceiroNome || null,
+      data: el("data").value,
+      horario: el("horario").value,
+      oQue: el("oque").value.trim(),
+    }, config);
+    botao.href = whatsapp.linkWhatsApp(config.empresa.whatsapp, texto);
+  }
+
+  function aoClicarWhatsApp(e) {
+    if (!estado.resultado) { e.preventDefault(); return; }
+    var faltando = camposFaltando();
+    if (!faltando.length) return;                 // tudo certo: o link abre o WhatsApp
+    e.preventDefault();
+    faltando.forEach(function (c) { el(c.id).classList.add("faltando"); });
+    el("aviso-falta").textContent = "Falta preencher " + faltando.map(function (c) { return c.nome; }).join(" e ") + ".";
+    el("aviso-falta").hidden = false;
+    el(faltando[0].id).focus();
+  }
+
+  function montarAgendar() {
+    // Não deixa escolher data no passado
+    var hoje = new Date();
+    hoje.setMinutes(hoje.getMinutes() - hoje.getTimezoneOffset());
+    el("data").min = hoje.toISOString().slice(0, 10);
+
+    el("botao-whatsapp").addEventListener("click", aoClicarWhatsApp);
+    ["retirada-numero", "retirada-complemento", "entrega-numero", "entrega-complemento", "data", "horario", "oque"]
+      .forEach(function (id) {
+        el(id).addEventListener("input", atualizarBotao);
+        el(id).addEventListener("change", atualizarBotao);
+      });
   }
 
   // ---------- Liga tudo ----------
   montarCabecalho();
   montarModalidades();
   montarCargaEspecial();
+  montarAgendar();
   montarEnderecos();
 
   // Trocar avulsa/agrupada ou carga especial recalcula o preço (sem refazer a rota)

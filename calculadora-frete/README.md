@@ -26,7 +26,7 @@ Depois de editar o `config.js`, abra `testes.html` no navegador: tudo verde = ta
 - [x] 2. Tela para celular (km digitado à mão)
 - [x] 3. Autocomplete de endereços (Photon)
 - [x] 4. Distância de rota (OpenRouteService) + dentro/fora de PG
-- [ ] 5. Botão "Agendar pelo WhatsApp"
+- [x] 5. Número/complemento + botão "Agendar pelo WhatsApp" (mensagem pronta com link do mapa)
 - [ ] 6. Publicar e gerar link para parceiros
 - [ ] 7. Carga especial e ajustes finos
 

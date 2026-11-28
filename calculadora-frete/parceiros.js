@@ -17,6 +17,7 @@ window.LFM_PARCEIROS = {
   // Cliente avulsa (retirada na casa dela). Troque "cliente-a" por
   // um código que você reconheça; o link muda junto.
   "cliente-a": {
+    nome: "Cliente A",                    // aparece na mensagem do WhatsApp para você saber quem pediu
     ajustes: {
       valorMinimoEntrega: 20.00,          // nunca cobra menos que R$ 20
       modalidadesPermitidas: ["avulsa"],  // não mostra a opção "agrupada"

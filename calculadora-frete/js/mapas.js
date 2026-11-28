@@ -55,9 +55,14 @@
         return dados.features
           .map(function (f) {
             var p = f.properties;
+            var ehLocal = p.type !== "street" && p.type !== "house";   // loja, escola, praça…
             return {
               titulo: montarTitulo(p),
               subtitulo: montarSubtitulo(p),
+              // partes separadas, para montar o endereço completo na mensagem
+              rua: p.type === "street" ? p.name : (p.street || ""),
+              nomeLocal: ehLocal || (p.type === "house" && p.name && p.name !== p.street) ? (p.name || "") : "",
+              bairro: p.district || "",
               cidade: p.city || (p.type === "city" ? p.name : "") || p.county || "",
               lat: f.geometry.coordinates[1],
               lon: f.geometry.coordinates[0],

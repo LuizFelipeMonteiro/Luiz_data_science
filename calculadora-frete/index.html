@@ -38,17 +38,33 @@
       <fieldset class="grupo">
         <legend>Endereços</legend>
 
-        <div class="campo campo-endereco">
-          <label for="retirada">Retirada</label>
-          <input id="retirada" type="text" placeholder="Digite a rua ou o local" autocomplete="off" autocapitalize="words" enterkeyhint="next">
+        <div class="bloco-endereco">
+          <div class="campo campo-endereco">
+            <label for="retirada">Retirada</label>
+            <input id="retirada" type="text" placeholder="Digite a rua ou o local" autocomplete="off" autocapitalize="words" enterkeyhint="next">
+          </div>
+          <div class="linha-numero">
+            <label class="campo campo-numero"><span>Nº *</span>
+              <input id="retirada-numero" type="text" inputmode="text" placeholder="500" autocomplete="off" maxlength="12"></label>
+            <label class="campo campo-compl"><span>Complemento / referência</span>
+              <input id="retirada-complemento" type="text" placeholder="Ex.: casa amarela" autocomplete="off" maxlength="80"></label>
+          </div>
         </div>
 
-        <div class="campo campo-endereco">
-          <label for="entrega">Entrega</label>
-          <input id="entrega" type="text" placeholder="Digite a rua ou o local" autocomplete="off" autocapitalize="words" enterkeyhint="done">
+        <div class="bloco-endereco">
+          <div class="campo campo-endereco">
+            <label for="entrega">Entrega</label>
+            <input id="entrega" type="text" placeholder="Digite a rua ou o local" autocomplete="off" autocapitalize="words" enterkeyhint="next">
+          </div>
+          <div class="linha-numero">
+            <label class="campo campo-numero"><span>Nº *</span>
+              <input id="entrega-numero" type="text" inputmode="text" placeholder="1234" autocomplete="off" maxlength="12"></label>
+            <label class="campo campo-compl"><span>Complemento / referência</span>
+              <input id="entrega-complemento" type="text" placeholder="Ex.: apto 302" autocomplete="off" maxlength="80"></label>
+          </div>
         </div>
 
-        <p class="dica">Digite o nome da rua e escolha na lista. O número da casa você informa na hora de agendar.</p>
+        <p class="dica">Digite o nome da rua e escolha na lista. Sem número? Escreva "S/N".</p>
       </fieldset>
 
       <!-- ========== CARGA ESPECIAL (só aparece se ativada no config) ========== -->
@@ -67,6 +83,26 @@
         </div>
         <p class="erro" id="erro" hidden></p>
       </div>
+
+      <!-- ========== AGENDAR (aparece depois que o valor é calculado) ========== -->
+      <div class="agendar" id="agendar" hidden>
+        <fieldset class="grupo">
+          <legend>Para agendar</legend>
+          <div class="linha-numero">
+            <label class="campo"><span>Data</span><input id="data" type="date"></label>
+            <label class="campo"><span>Horário</span><input id="horario" type="time"></label>
+          </div>
+          <label class="campo"><span>O que vai ser entregue?</span>
+            <input id="oque" type="text" placeholder="Ex.: buquê de rosas, bolo, caixa pequena" autocomplete="off" maxlength="120"></label>
+        </fieldset>
+
+        <p class="aviso-falta" id="aviso-falta" hidden></p>
+        <a class="botao-whatsapp" id="botao-whatsapp" href="#" target="_blank" rel="noopener" aria-disabled="true">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.3-.4.8-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
+          Agendar pelo WhatsApp
+        </a>
+        <p class="dica centro">Abre o WhatsApp com a mensagem pronta. É só conferir e enviar.</p>
+      </div>
     </section>
 
     <p class="rodape">A LFM não guarda seus dados. O último endereço de retirada fica salvo só neste aparelho.</p>
@@ -80,6 +116,7 @@
   <script src="js/precos.js"></script>
   <script src="js/mapas.js"></script>
   <script src="js/autocompletar.js"></script>
+  <script src="js/whatsapp.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
