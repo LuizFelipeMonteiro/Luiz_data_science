@@ -39,6 +39,11 @@ Depois de editar o `config.js`, abra `testes.html` no navegador: tudo verde = ta
   (ex.: `.../?parceiro=confeitaria`). O `js/precos.js` já recebe o config como
   parâmetro, então não precisa ser reescrito.
 - **Agendamento para pequenos negócios parceiros** (próxima fase após a calculadora).
+- **Nicho floriculturas (ideia da cliente piloto):** entrega de carro com cuidado e
+  apresentação (produto "de alto sentimento"). Possíveis opções por cliente em
+  `parceiros.js`: tipo de veículo (só carro), foto de comprovação, horário exato.
+  Validar antes com outras floriculturas de PG, principalmente os picos
+  (Dia das Mães, Namorados, Finados, Dia da Mulher).
 
 ## Chave do serviço de rotas
 
