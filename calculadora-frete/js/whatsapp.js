@@ -44,12 +44,11 @@
     return linhas.join("\n");
   }
 
-  function km(valor) { return String(valor).replace(".", ","); }
-
   /**
    * @param {Object} d
    *   retirada: { titulo, rua, bairro, cidade, nomeLocal, numero, complemento, placeId }
-   *   entregas: [ { (mesmos campos do endereço), km, valorTexto, obs } ]   ← uma ou várias
+   *   entregas: [ { (mesmos campos do endereço), minutos, valorTexto, obs } ]   ← uma ou várias
+   *   (a quilometragem NÃO vai na mensagem: o cliente lê o texto antes de enviar)
    *   totalTexto, tipo (ex.: "entrega avulsa", "3 entregas agrupadas"),
    *   cargaEspecial (bool), parceiro (texto ou null),
    *   data ("AAAA-MM-DD"), horario ("HH:MM"), oQue (texto)
@@ -65,12 +64,12 @@
     if (d.entregas.length === 1) {
       var e = d.entregas[0];
       partes.push(blocoEndereco("Entrega", e));
-      partes.push("Distância: " + km(e.km) + " km\n" +
+      partes.push((e.minutos ? "Tempo de carro: cerca de " + e.minutos + " min\n" : "") +
         "Valor: " + d.totalTexto + (d.tipo ? " (" + d.tipo + ")" : "") + especial);
     } else {
       d.entregas.forEach(function (e, i) {
         partes.push(blocoEndereco("Entrega " + (i + 1), e) + "\n" +
-          km(e.km) + " km · " + e.valorTexto + (e.obs ? " (" + e.obs + ")" : ""));
+          "Valor: " + e.valorTexto + (e.obs ? " (" + e.obs + ")" : ""));
       });
       partes.push("*Total: " + d.totalTexto + "*" + (d.tipo ? " (" + d.tipo + ")" : "") + especial);
     }

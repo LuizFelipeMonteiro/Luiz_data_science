@@ -30,7 +30,7 @@ var CFG = global.LFM_CONFIG;
   var ret = { rua: "Rua Balduíno Taques", numero: "500", bairro: "Centro", cidade: "Ponta Grossa", complemento: "casa amarela" };
   var ent = { rua: "Avenida General Carlos Cavalcanti", numero: "4748", bairro: "Uvaranas", cidade: "Ponta Grossa",
               nomeLocal: "Floricultura X", placeId: "ChIJ123", numeroGoogle: "4748" };
-  var msg = whatsapp.montarMensagem({ retirada: ret, entregas: [Object.assign({ km: 7.3, valorTexto: "R$ 29,20" }, ent)],
+  var msg = whatsapp.montarMensagem({ retirada: ret, entregas: [Object.assign({ minutos: 11, valorTexto: "R$ 29,20" }, ent)],
     totalTexto: "R$ 29,20", tipo: "entrega avulsa", parceiro: "Cliente A", data: "2026-12-05", horario: "14:30", oQue: "" }, CFG);
   ok(msg.indexOf("*Retirada:* Rua Balduíno Taques, 500 – Centro, Ponta Grossa") >= 0, "mensagem: endereço de retirada completo");
   ok(msg.indexOf("*Entrega:* Floricultura X – Avenida General Carlos Cavalcanti, 4748 – Uvaranas, Ponta Grossa") >= 0, "mensagem: nome da loja na entrega");
@@ -40,15 +40,17 @@ var CFG = global.LFM_CONFIG;
   ok(msg.indexOf("Data: 05/12/2026") >= 0 && msg.indexOf("O que vai ser entregue: (a combinar)") >= 0, "mensagem: data formatada e campo vazio 'a combinar'");
 
   // Pedido com 3 entregas (uma fora da cidade)
-  var e2 = { rua: "Rua Ermelino de Leão", numero: "10", bairro: "Olarias", cidade: "Ponta Grossa", km: 2.1, valorTexto: "R$ 12,00" };
-  var e3 = { rua: "Rua X", numero: "5", cidade: "Carambeí", km: 20, valorTexto: "R$ 100,00", obs: "fora de Ponta Grossa, ida e volta" };
+  var e2 = { rua: "Rua Ermelino de Leão", numero: "10", bairro: "Olarias", cidade: "Ponta Grossa", minutos: 4, valorTexto: "R$ 12,00" };
+  var e3 = { rua: "Rua X", numero: "5", cidade: "Carambeí", minutos: 20, valorTexto: "R$ 100,00", obs: "fora de Ponta Grossa, ida e volta" };
   var grupo = whatsapp.montarMensagem({ retirada: ret,
-    entregas: [Object.assign({ km: 4, valorTexto: "R$ 14,00" }, ent), e2, e3],
+    entregas: [Object.assign({ minutos: 8, valorTexto: "R$ 14,00" }, ent), e2, e3],
     totalTexto: "R$ 126,00", tipo: "3 entregas agrupadas" }, CFG);
   ok(grupo.indexOf("*Entrega 1:* Floricultura X") >= 0 && grupo.indexOf("*Entrega 2:* Rua Ermelino de Leão, 10") >= 0 &&
      grupo.indexOf("*Entrega 3:* Rua X, 5 – Carambeí") >= 0, "mensagem com várias entregas: numera cada uma");
-  ok(grupo.indexOf("2,1 km · R$ 12,00") >= 0 && grupo.indexOf("20 km · R$ 100,00 (fora de Ponta Grossa, ida e volta)") >= 0,
-     "mensagem com várias entregas: distância e valor de cada uma");
+  ok(grupo.indexOf("Valor: R$ 12,00") >= 0 && grupo.indexOf("Valor: R$ 100,00 (fora de Ponta Grossa, ida e volta)") >= 0,
+     "mensagem com várias entregas: valor de cada uma");
+  ok(!/\bkm\b/i.test(msg) && !/\bkm\b/i.test(grupo), "mensagem não mostra quilometragem (o cliente lê antes de enviar)");
+  ok(msg.indexOf("Tempo de carro: cerca de 11 min") >= 0, "mensagem de 1 entrega mostra o tempo de carro");
   ok(grupo.indexOf("*Total: R$ 126,00* (3 entregas agrupadas)") >= 0, "mensagem com várias entregas: total");
 
   ok(whatsapp.linkMapa(ent).indexOf("query_place_id=ChIJ123") > 0, "mapa: usa o código do local do Google");

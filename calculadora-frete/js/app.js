@@ -45,7 +45,7 @@
   };
   var proximoId = 1;
 
-  function kmTexto(km) { return String(km).replace(".", ","); }
+  function minutos(rota) { return Math.max(1, Math.round(rota.minutos)); }
   function juntar(lista) {          // ["a", "b", "c"] → "a, b e c"
     return lista.length <= 1 ? lista.join("") : lista.slice(0, -1).join(", ") + " e " + lista[lista.length - 1];
   }
@@ -310,8 +310,8 @@
     if (prontas.length === 1) {
       var item = p.itens[0];
       el("resultado-rotulo").textContent = "Valor da entrega";
-      el("detalhe").textContent = kmTexto(item.kmConsiderado) + " km de carro · cerca de " +
-        Math.max(1, Math.round(prontas[0].rota.minutos)) + " min" +
+      // Só o tempo: a quilometragem não aparece para o cliente (decisão do Luiz)
+      el("detalhe").textContent = "Cerca de " + minutos(prontas[0].rota) + " min de carro" +
         (item.dentroDaCidade ? "" : " · fora de " + nomeCidade + " (ida e volta)");
       lista.hidden = true;
       return;
@@ -324,8 +324,8 @@
     p.itens.forEach(function (item, i) {
       var li = document.createElement("li");
       var desc = document.createElement("span");
-      desc.textContent = "Entrega " + (estado.entregas.indexOf(prontas[i]) + 1) + " · " +
-        kmTexto(item.kmConsiderado) + " km" + (item.dentroDaCidade ? "" : " · fora da cidade");
+      desc.textContent = "Entrega " + (estado.entregas.indexOf(prontas[i]) + 1) +
+        (item.dentroDaCidade ? "" : " · fora da cidade");
       var valor = document.createElement("span");
       valor.textContent = precos.formatarReais(item.valor);
       li.appendChild(desc);
@@ -399,7 +399,7 @@
         return Object.assign({}, e.item, {
           numero: e.el.numero.value.trim(),
           complemento: e.el.complemento.value.trim(),
-          km: item.kmConsiderado,
+          minutos: minutos(e.rota),
           valorTexto: precos.formatarReais(item.valor),
           obs: item.dentroDaCidade ? "" : "fora de " + nomeCidade + ", ida e volta",
         });

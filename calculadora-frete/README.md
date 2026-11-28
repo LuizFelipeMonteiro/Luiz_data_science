@@ -41,7 +41,10 @@ O cliente informa a retirada e quantas entregas quiser (até `maxEntregas`, no
 - Cliente com `modalidadesPermitidas: ["avulsa"]` (ex.: `cliente-a`) paga
   avulsa em cada entrega, mesmo com várias.
 - Entrega fora da cidade segue a regra de fora da cidade, mesmo dentro de um grupo.
-- A mensagem do WhatsApp lista cada entrega (endereço, mapa, km e valor) e o total.
+- A mensagem do WhatsApp lista cada entrega (endereço, mapa e valor) e o total.
+- **A quilometragem não aparece para o cliente** (nem na tela, nem na mensagem, que ele lê
+  antes de enviar), para ele não fazer a conta do preço. Aparece só o tempo de carro.
+  Para conferir a km de um pedido, abra o link do mapa da mensagem.
 
 ## Link de cada cliente
 
