@@ -46,8 +46,8 @@
 
   /**
    * @param {Object} d
-   *   retirada, entrega: { titulo, rua, bairro, cidade, nomeLocal, numero, complemento }
-   *   km, valorTexto, modalidadeRotulo, cargaEspecial (bool), parceiro (texto ou null)
+   *   retirada, entrega: { titulo, rua, bairro, cidade, nomeLocal, numero, complemento, placeId }
+   *   km, valorTexto, tipo (ex.: "entrega avulsa"), cargaEspecial (bool), parceiro (texto ou null)
    *   data ("AAAA-MM-DD"), horario ("HH:MM"), oQue (texto)
    */
   function montarMensagem(d, config) {
@@ -57,7 +57,7 @@
       blocoEndereco("Retirada", d.retirada),
       blocoEndereco("Entrega", d.entrega),
       "Distância: " + String(d.km).replace(".", ",") + " km\n" +
-        "Valor: " + d.valorTexto + (d.modalidadeRotulo ? " (" + d.modalidadeRotulo.toLowerCase() + ")" : "") +
+        "Valor: " + d.valorTexto + (d.tipo ? " (" + d.tipo + ")" : "") +
         (d.cargaEspecial ? "\nCarga especial: sim" : ""),
       "Data: " + (formatarData(d.data) || aCombinar) + "\n" +
         "Horário: " + (d.horario || aCombinar) + "\n" +

@@ -21,7 +21,7 @@
   // ============================================================
 
   function normalizar(texto) {
-    return String(texto || "").normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
+    return String(texto || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
   }
 
   function mesmaCidade(cidade, nomeCidade) {
@@ -129,7 +129,7 @@
             numero: parte(c, "street_number"),
             numeroGoogle: parte(c, "street_number"),   // para saber se a pessoa trocou o número depois
             bairro: parte(c, "sublocality_level_1") || parte(c, "sublocality") || parte(c, "neighborhood"),
-            cidade: parte(c, "locality") || parte(c, "administrative_area_level_2"),
+            cidade: parte(c, "administrative_area_level_2") || parte(c, "locality"),   // município
             nomeLocal: item.ehEstabelecimento ? item.titulo : "",
             enderecoGoogle: d.formattedAddress || "",
           });
@@ -273,7 +273,11 @@
       motor.nome = reserva.nome;
       console.warn("Google indisponível – usando o mapa gratuito.", erro);
     }
-    function deveTrocar(erro) { return !usandoReserva && !(erro && erro.name === "AbortError"); }
+    function deveTrocar(erro) {
+      if (usandoReserva || (erro && erro.name === "AbortError")) return false;
+      // celular sem internet: o problema não é o Google, então não troca de motor
+      return !(global.navigator && global.navigator.onLine === false);
+    }
 
     motor.buscar = function (texto, sinal, sessao) {
       if (usandoReserva) return reserva.buscar(texto, sinal, sessao);
@@ -317,5 +321,6 @@
   }
 
   global.LFM = global.LFM || {};
-  global.LFM.mapas = { criar: criar, mesmaCidade: mesmaCidade, novaSessao: novaSessao };
+  global.LFM.mapas = { criar: criar, mesmaCidade: mesmaCidade, novaSessao: novaSessao, _comReserva: motorComReserva };
+  if (typeof module !== "undefined" && module.exports) module.exports = global.LFM.mapas;
 })(typeof window !== "undefined" ? window : globalThis);

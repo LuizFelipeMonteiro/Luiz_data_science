@@ -13,6 +13,7 @@
   --cor-borda: #d8dee6;
   --cor-erro: #b42318;
   --raio: 12px;
+  color-scheme: light;         /* campos de data/hora claros mesmo com o celular no modo escuro */
 }
 
 * { box-sizing: border-box; }
@@ -82,20 +83,8 @@ body {
   margin-bottom: 8px;
   padding: 0;
 }
-.etiqueta {
-  font-size: .72rem;
-  font-weight: 600;
-  background: #fff4d6;
-  color: #8a5a00;
-  padding: 2px 6px;
-  border-radius: 6px;
-  margin-left: 4px;
-  vertical-align: middle;
-}
-
-/* Opções do tipo "botão" (avulsa / agrupada, dentro / fora) */
+/* Opções do tipo "botão" (avulsa / agrupada) */
 .opcoes { display: grid; gap: 8px; }
-.opcoes-dupla { grid-template-columns: 1fr 1fr; margin-top: 10px; }
 .opcao { position: relative; cursor: pointer; }
 .opcao input { position: absolute; opacity: 0; pointer-events: none; }
 .opcao span {
@@ -220,7 +209,7 @@ input[type="date"], input[type="time"] { min-height: 46px; background: #fff; col
   text-decoration: none;
 }
 .botao-whatsapp:hover { background: #18773f; }
-.botao-whatsapp[aria-disabled="true"] { background: #9aa6b2; }
+.botao-whatsapp[aria-disabled="true"] { background: #6b7785; }
 .aviso-falta { color: var(--cor-erro); font-size: .9rem; margin: 0 0 10px; text-align: center; }
 .dica.centro { text-align: center; margin-top: 8px; }
 

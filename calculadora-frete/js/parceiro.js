@@ -26,7 +26,7 @@
    * Se o código não existir (ou estiver vazio), devolve a tabela padrão.
    */
   function montarConfig(configBase, parceiros, codigo) {
-    var p = codigo && parceiros && parceiros[codigo];
+    var p = codigo && parceiros && Object.prototype.hasOwnProperty.call(parceiros, codigo) && parceiros[codigo];
     if (!p) return mesclar(configBase, {});
     var cfg = mesclar(configBase, p.ajustes);
     cfg.parceiroAtivo = codigo;

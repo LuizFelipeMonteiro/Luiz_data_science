@@ -31,6 +31,8 @@
     require("../js/parceiro.js");
     var precos = require("../js/precos.js");
     var casos = require("./casos.js");
+    var avisos = require("./verificar-config.js")(global.LFM_CONFIG, global.LFM_PARCEIROS);
+    avisos.forEach(function (a) { console.log("AVISO  " + a); });
     var res = rodarTestes(global.LFM_CONFIG, precos, casos);
     var falhas = 0;
     res.forEach(function (t) {
@@ -41,7 +43,8 @@
         "  esperado " + precos.formatarReais(t.caso.esperado) +
         "  obtido " + precos.formatarReais(t.resultado.valor));
     });
-    console.log("\n" + (res.length - falhas) + "/" + res.length + " passaram");
-    process.exit(falhas ? 1 : 0);
+    console.log("\n" + (res.length - falhas) + "/" + res.length + " passaram" +
+      (avisos.length ? " | " + avisos.length + " aviso(s) no config" : " | config sem avisos"));
+    process.exit(falhas || avisos.length ? 1 : 0);
   }
 })(typeof window !== "undefined" ? window : globalThis);

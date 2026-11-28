@@ -11,6 +11,8 @@
     .resumo { padding: 12px 16px; border-radius: 10px; font-weight: 600; margin-bottom: 16px; }
     .resumo.ok { background: #e3f6e8; color: #17692f; }
     .resumo.falha { background: #fde7e7; color: #a11d1d; }
+    .resumo.atencao { background: #fff4d6; color: #7a4f00; font-weight: 500; }
+    .resumo ul { margin: 6px 0 0; padding-left: 20px; }
     .tabela { overflow-x: auto; background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
     table { border-collapse: collapse; width: 100%; font-size: .92rem; }
     th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; white-space: nowrap; }
@@ -23,7 +25,8 @@
 </head>
 <body>
   <h1>Conferência da tabela de preços</h1>
-  <p>Esta página confere se a calculadora acerta os exemplos. Abra de novo sempre que mudar o <code>config.js</code>.</p>
+  <p>Esta página confere se a calculadora acerta os exemplos. Abra de novo sempre que mudar o <code>config.js</code> ou o <code>parceiros.js</code>.</p>
+  <div id="verificacao" class="resumo"></div>
   <div id="resumo" class="resumo"></div>
   <div class="tabela">
     <table>
@@ -38,12 +41,46 @@
   <script src="js/precos.js"></script>
   <script src="testes/casos.js"></script>
   <script src="testes/rodar-testes.js"></script>
+  <script src="testes/verificar-config.js"></script>
   <script>
     (function () {
-      var f = LFM.precos.formatarReais;
-      var res = LFM.rodarTestes(LFM_CONFIG, LFM.precos, LFM.casosDeTeste);
-      var falhas = res.filter(function (t) { return !t.ok; }).length;
       var resumo = document.getElementById("resumo");
+      var caixa = document.getElementById("verificacao");
+
+      // 1) O arquivo nem carregou? (erro de digitação: vírgula no lugar de ponto, aspas faltando…)
+      if (!window.LFM_CONFIG || !window.LFM_PARCEIROS) {
+        caixa.className = "resumo falha";
+        caixa.textContent = "✗ O arquivo " + (!window.LFM_CONFIG ? "config.js" : "parceiros.js") +
+          " tem um erro de digitação e não carregou. Confira a última alteração: centavos com ponto (2.50), " +
+          "vírgula no fim de cada linha, textos entre aspas. Dica: aperte F12 → Console para ver a linha do erro.";
+        resumo.hidden = true;
+        return;
+      }
+
+      // 2) Confere nomes e valores do config.js e do parceiros.js
+      var avisos = LFM.verificarConfig(LFM_CONFIG, LFM_PARCEIROS);
+      if (avisos.length) {
+        caixa.className = "resumo atencao";
+        caixa.textContent = "⚠ Confira no config.js / parceiros.js:";
+        var ul = document.createElement("ul");
+        avisos.forEach(function (a) { var li = document.createElement("li"); li.textContent = a; ul.appendChild(li); });
+        caixa.appendChild(ul);
+      } else {
+        caixa.className = "resumo ok";
+        caixa.textContent = "✓ config.js e parceiros.js preenchidos corretamente";
+      }
+
+      // 3) Confere os preços com os exemplos
+      var f = LFM.precos.formatarReais;
+      var res;
+      try {
+        res = LFM.rodarTestes(LFM_CONFIG, LFM.precos, LFM.casosDeTeste);
+      } catch (e) {
+        resumo.className = "resumo falha";
+        resumo.textContent = "✗ Não foi possível calcular os exemplos: " + e.message;
+        return;
+      }
+      var falhas = res.filter(function (t) { return !t.ok; }).length;
       resumo.className = "resumo " + (falhas ? "falha" : "ok");
       resumo.textContent = falhas
         ? "✗ " + falhas + " de " + res.length + " exemplos com valor diferente do esperado"

@@ -4,11 +4,29 @@
  * 1. A pessoa escolhe os endereços (autocompletar.js + mapas.js).
  * 2. Calculamos a rota de carro (mapas.js).
  * 3. Calculamos o preço (precos.js) e mostramos só o valor final.
+ * 4. Montamos a mensagem do WhatsApp (whatsapp.js).
  *
  * Os preços não ficam aqui. Eles ficam no config.js / parceiros.js.
  */
 (function () {
   "use strict";
+
+  function el(id) { return document.getElementById(id); }
+
+  // ---------- 0. Se o config.js ou o parceiros.js tiver erro de digitação ----------
+  // (ex.: vírgula no lugar de ponto), o arquivo não carrega. Em vez de uma
+  // página "morta", mostramos um aviso claro.
+  if (!window.LFM_CONFIG || !window.LFM_PARCEIROS) {
+    var cartao = document.querySelector(".cartao");
+    cartao.innerHTML =
+      "<h2>Calculadora indisponível no momento</h2>" +
+      "<p>Por favor, chame a LFM Transportes no WhatsApp.</p>" +
+      '<p class="dica">Aviso técnico: há um erro de digitação no ' +
+      (!window.LFM_CONFIG ? "config.js" : "parceiros.js") +
+      " (confira vírgulas, pontos e aspas). Abra o testes.html para ver detalhes.</p>";
+    console.error("config.js ou parceiros.js não carregou – provável erro de digitação.");
+    return;
+  }
 
   // Lê o código do parceiro no link (ex.: index.html?parceiro=cliente-a)
   var codigoParceiro = new URLSearchParams(window.location.search).get("parceiro");
@@ -18,10 +36,8 @@
   var whatsapp = window.LFM.whatsapp;
 
   // O que já foi escolhido na tela
-  var estado = { retirada: null, entrega: null, rota: null, resultado: null };
+  var estado = { retirada: null, entrega: null, rota: null, resultado: null, dentro: true };
   var calculoAtual = 0;   // evita mostrar resultado velho se a pessoa trocar o endereço no meio
-
-  function el(id) { return document.getElementById(id); }
 
   // ---------- 1. Preenche a página com os dados do config ----------
   function montarCabecalho() {
@@ -41,22 +57,29 @@
   function montarModalidades() {
     var caixa = el("opcoes-modalidade");
     var modalidades = config.dentroDaCidade.modalidades;
-    var permitidas = config.modalidadesPermitidas || Object.keys(modalidades);
+    // Só as modalidades que existem de verdade (protege contra erro de digitação no parceiros.js)
+    var permitidas = (config.modalidadesPermitidas || []).filter(function (k) { return modalidades[k]; });
+    if (!permitidas.length) permitidas = Object.keys(modalidades);
     // Só uma opção possível (ex.: cliente sempre avulsa) → nem mostra a escolha
     if (permitidas.length === 1) caixa.closest("fieldset").hidden = true;
+
     permitidas.forEach(function (chave, i) {
       var faixas = modalidades[chave].faixas;
       var label = document.createElement("label");
       label.className = "opcao";
-      label.innerHTML =
-        '<input type="radio" name="modalidade" value="' + chave + '"' + (i === 0 ? " checked" : "") + ">" +
-        "<span></span>";
-      var span = label.querySelector("span");
+      var radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "modalidade";
+      radio.value = chave;
+      radio.checked = i === 0;
+      var span = document.createElement("span");
       span.textContent = modalidades[chave].rotulo;
       var dica = document.createElement("small");
       dica.textContent = "a partir de " +
         precos.formatarReais(Math.max(faixas[0].valor, config.valorMinimoEntrega || 0));
       span.appendChild(dica);
+      label.appendChild(radio);
+      label.appendChild(span);
       caixa.appendChild(label);
     });
   }
@@ -73,19 +96,34 @@
 
   // ---------- 2. Endereços ----------
 
-  // O celular lembra a última retirada, com número e complemento
-  // (fica só no aparelho de quem usa; nada vai para a LFM)
-  var CHAVE_SALVA = "lfm.retirada";
+  // O celular lembra a última retirada, com número e complemento.
+  // Fica só no aparelho de quem usa (nada vai para a LFM), separado por
+  // cliente parceiro, e vale por 30 dias (regra do Google para guardar
+  // coordenadas; depois disso a pessoa digita o endereço de novo).
+  var CHAVE_SALVA = "lfm.retirada." + (config.parceiroAtivo || "geral");
+  var VALIDADE_MS = 30 * 24 * 60 * 60 * 1000;
+  try { localStorage.removeItem("lfm.retirada"); } catch (e) { /* formato antigo */ }
+
   function lerRetiradaSalva() {
-    try { return JSON.parse(localStorage.getItem(CHAVE_SALVA)); } catch (e) { return null; }
+    try {
+      var s = JSON.parse(localStorage.getItem(CHAVE_SALVA));
+      if (!s || !s.item || s.item.lat == null) return null;
+      if (!(Date.now() - (s.item.obtidoEm || 0) < VALIDADE_MS)) {
+        localStorage.removeItem(CHAVE_SALVA);
+        return null;
+      }
+      return s;
+    } catch (e) { return null; }
   }
+
   function salvarRetirada() {
     if (!config.mapas.lembrarRetirada || !estado.retirada) return;
-    var item = Object.assign({}, estado.retirada, {
+    var dados = {
+      item: estado.retirada,
       numero: el("retirada-numero").value.trim(),
       complemento: el("retirada-complemento").value.trim(),
-    });
-    try { localStorage.setItem(CHAVE_SALVA, JSON.stringify(item)); } catch (e) { /* sem problema */ }
+    };
+    try { localStorage.setItem(CHAVE_SALVA, JSON.stringify(dados)); } catch (e) { /* sem problema */ }
   }
 
   // Motor de mapas: Google ou gratuito (ver config.js → mapas.provedor)
@@ -94,27 +132,37 @@
   /*
    * Liga um campo de endereço ao motor de mapas.
    * Quando a pessoa escolhe uma sugestão, buscamos os detalhes
-   * (coordenadas, número, bairro) e avisamos "aoDefinir".
+   * (coordenadas, número, bairro) e avisamos "aoDefinir(item, restaurado)".
    */
   function campoEndereco(id, idNumero, aoDefinir) {
     var sessao = mapas.novaSessao();
     var versao = 0;                     // ignora respostas velhas se a pessoa trocar de ideia
+    var restaurando = false;
 
-    return LFM.autocompletar(el(id), {
+    // Endereço novo escolhido: o número vem DELE (ou fica vazio para a pessoa digitar).
+    // Nunca reaproveita o número do endereço anterior.
+    function usar(completo) {
+      completo.obtidoEm = Date.now();
+      el(idNumero).value = completo.numero || "";
+      aoDefinir(completo, false);
+    }
+
+    var campo = LFM.autocompletar(el(id), {
       buscar: function (texto, sinal) { return motor.buscar(texto, sinal, sessao); },
-      rodape: function () { return motor.nome === "google" ? "Endereços por Google" : ""; },
+      // crédito obrigatório de quem fornece os endereços
+      rodape: function () { return motor.nome === "google" ? "Google Maps" : "© OpenStreetMap"; },
       aoEscolher: function (item) {
         var minhaVersao = ++versao;
-        if (!item) { aoDefinir(null); return; }
-        if (item.lat != null) { aoDefinir(item); return; }   // já vem completo (motor gratuito ou endereço salvo)
+        if (!item) { aoDefinir(null, false); return; }
+        if (restaurando) { aoDefinir(item, true); return; }   // endereço lembrado pelo celular
+        if (item.lat != null) { usar(item); return; }        // motor gratuito: já vem completo
 
         mostrar("carregando");
         motor.detalhar(item, sessao)
           .then(function (completo) {
             if (minhaVersao !== versao) return;
-            sessao = mapas.novaSessao();                        // próxima busca = nova sessão
-            if (completo.numero) el(idNumero).value = completo.numero;
-            aoDefinir(completo);
+            sessao = mapas.novaSessao();                       // próxima busca = nova sessão
+            usar(completo);
           })
           .catch(function (erro) {
             if (minhaVersao !== versao) return;
@@ -125,14 +173,18 @@
           });
       },
     });
+
+    return {
+      restaurar: function (item) { restaurando = true; campo.definir(item); restaurando = false; },
+    };
   }
 
   function montarEnderecos() {
-    var campoRetirada = campoEndereco("retirada", "retirada-numero", function (item) {
+    var campoRetirada = campoEndereco("retirada", "retirada-numero", function (item, restaurado) {
       estado.retirada = item;
-      salvarRetirada();
+      if (!restaurado) salvarRetirada();
       aoMudarEndereco();
-      if (item && !el("retirada-numero").value) el("retirada-numero").focus();   // próximo passo: o número
+      if (item && !restaurado && !el("retirada-numero").value) el("retirada-numero").focus();   // próximo passo: o número
     });
     campoEndereco("entrega", "entrega-numero", function (item) {
       estado.entrega = item;
@@ -141,10 +193,10 @@
     });
 
     var salva = config.mapas.lembrarRetirada && lerRetiradaSalva();
-    if (salva && salva.lat) {
+    if (salva) {
       el("retirada-numero").value = salva.numero || "";
       el("retirada-complemento").value = salva.complemento || "";
-      campoRetirada.definir(salva);
+      campoRetirada.restaurar(salva.item);
     }
 
     // Número e complemento da retirada também ficam lembrados
@@ -226,6 +278,13 @@
     return obrigatorios.filter(function (c) { return !el(c.id).value.trim(); });
   }
 
+  // Texto do tipo de entrega que vai na mensagem: "entrega avulsa", "entregas agrupadas"…
+  function tipoParaMensagem() {
+    if (!estado.dentro) return "fora de " + config.dentroDaCidade.nomeCidade + ", ida e volta";
+    var m = config.dentroDaCidade.modalidades[valorMarcado("modalidade")];
+    return m ? m.rotulo.replace(/\s*\(.*\)\s*$/, "").toLowerCase() : "";
+  }
+
   function atualizarBotao() {
     var botao = el("botao-whatsapp");
     if (!estado.resultado) { botao.setAttribute("aria-disabled", "true"); botao.href = "#"; return; }
@@ -237,7 +296,6 @@
     if (!faltando.length) el("aviso-falta").hidden = true;
     botao.setAttribute("aria-disabled", faltando.length ? "true" : "false");
 
-    var modalidade = valorMarcado("modalidade");
     var texto = whatsapp.montarMensagem({
       retirada: Object.assign({}, estado.retirada, {
         numero: el("retirada-numero").value.trim(),
@@ -249,7 +307,7 @@
       }),
       km: estado.resultado.kmConsiderado,
       valorTexto: precos.formatarReais(estado.resultado.valor),
-      modalidadeRotulo: estado.dentro ? config.dentroDaCidade.modalidades[modalidade].rotulo : "",
+      tipo: tipoParaMensagem(),
       cargaEspecial: el("especial").checked,
       parceiro: config.parceiroNome || null,
       data: el("data").value,

@@ -25,6 +25,4 @@ Veja os tutoriais publicados do Sigmoidal:
 
 * **Monitor de licitações (PNCP):** agente que vigia licitações públicas e avisa por Telegram/e-mail — [monitor_licitacoes](monitor_licitacoes/)
 
-
-
-
+* **Calculadora de frete (LFM Transportes):** página que calcula o frete pela rota de carro (Google Maps) e agenda pelo WhatsApp — [calculadora-frete](calculadora-frete/)

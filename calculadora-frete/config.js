@@ -2,14 +2,15 @@
  * ============================================================
  *  CONFIGURAÇÃO DA CALCULADORA — LFM Transportes
  * ============================================================
- *  Este é o ÚNICO arquivo que você precisa editar para mudar
- *  preços, número do WhatsApp, nome ou logo.
+ *  Aqui ficam os preços, o WhatsApp, o nome e o logo.
+ *  Condições de cada cliente: parceiros.js. Chaves: chave.js.
  *
  *  Regras para editar sem quebrar nada:
  *   - Use PONTO para centavos: 2.50 (e não 2,50).
  *   - Não apague vírgulas no fim das linhas.
  *   - Textos ficam entre aspas: "assim".
- *   - Depois de salvar, abra o arquivo testes.html para conferir.
+ *   - Depois de salvar, abra o arquivo testes.html para conferir
+ *     (ele também avisa se algo foi digitado errado).
  * ============================================================
  */
 window.LFM_CONFIG = {
