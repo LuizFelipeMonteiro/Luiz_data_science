@@ -88,25 +88,54 @@
     try { localStorage.setItem(CHAVE_SALVA, JSON.stringify(item)); } catch (e) { /* sem problema */ }
   }
 
-  function buscar(texto, sinal) { return mapas.buscarEnderecos(texto, config.mapas, sinal); }
+  // Motor de mapas: Google ou gratuito (ver config.js → mapas.provedor)
+  var motor = mapas.criar(config.mapas, { google: window.LFM_CHAVE_GOOGLE, ors: window.LFM_CHAVE_ROTAS });
 
-  function montarEnderecos() {
-    var campoRetirada = LFM.autocompletar(el("retirada"), {
-      buscar: buscar,
+  /*
+   * Liga um campo de endereço ao motor de mapas.
+   * Quando a pessoa escolhe uma sugestão, buscamos os detalhes
+   * (coordenadas, número, bairro) e avisamos "aoDefinir".
+   */
+  function campoEndereco(id, idNumero, aoDefinir) {
+    var sessao = mapas.novaSessao();
+    var versao = 0;                     // ignora respostas velhas se a pessoa trocar de ideia
+
+    return LFM.autocompletar(el(id), {
+      buscar: function (texto, sinal) { return motor.buscar(texto, sinal, sessao); },
+      rodape: motor.nome === "google" ? "Endereços por Google" : "",
       aoEscolher: function (item) {
-        estado.retirada = item;
-        salvarRetirada();
-        aoMudarEndereco();
-        if (item) el("retirada-numero").focus();   // próximo passo: o número
+        var minhaVersao = ++versao;
+        if (!item) { aoDefinir(null); return; }
+        if (item.lat != null) { aoDefinir(item); return; }   // já vem completo (motor gratuito ou endereço salvo)
+
+        mostrar("carregando");
+        motor.detalhar(item, sessao)
+          .then(function (completo) {
+            if (minhaVersao !== versao) return;
+            sessao = mapas.novaSessao();                        // próxima busca = nova sessão
+            if (completo.numero) el(idNumero).value = completo.numero;
+            aoDefinir(completo);
+          })
+          .catch(function (erro) {
+            if (minhaVersao !== versao) return;
+            console.error("Erro ao detalhar endereço:", erro);
+            mostrar("erro", "Não conseguimos localizar esse endereço agora. Tente de novo ou chame a LFM no WhatsApp.");
+          });
       },
     });
-    LFM.autocompletar(el("entrega"), {
-      buscar: buscar,
-      aoEscolher: function (item) {
-        estado.entrega = item;
-        aoMudarEndereco();
-        if (item) el("entrega-numero").focus();
-      },
+  }
+
+  function montarEnderecos() {
+    var campoRetirada = campoEndereco("retirada", "retirada-numero", function (item) {
+      estado.retirada = item;
+      salvarRetirada();
+      aoMudarEndereco();
+      if (item && !el("retirada-numero").value) el("retirada-numero").focus();   // próximo passo: o número
+    });
+    campoEndereco("entrega", "entrega-numero", function (item) {
+      estado.entrega = item;
+      aoMudarEndereco();
+      if (item && !el("entrega-numero").value) el("entrega-numero").focus();
     });
 
     var salva = config.mapas.lembrarRetirada && lerRetiradaSalva();
@@ -129,7 +158,7 @@
 
     var meuCalculo = ++calculoAtual;
     mostrar("carregando");
-    mapas.calcularRota(estado.retirada, estado.entrega, config.mapas, window.LFM_CHAVE_ROTAS)
+    motor.rota(estado.retirada, estado.entrega)
       .then(function (rota) {
         if (meuCalculo !== calculoAtual) return;   // a pessoa já mudou o endereço
         estado.rota = rota;

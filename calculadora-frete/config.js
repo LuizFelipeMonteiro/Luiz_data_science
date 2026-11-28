@@ -76,13 +76,28 @@ window.LFM_CONFIG = {
   },
 
   // ---------- Mapas (normalmente não precisa mexer) ----------
-  // A chave do serviço de rotas fica no arquivo chave.js.
+  // As chaves ficam no arquivo chave.js.
   mapas: {
-    buscaUrl: "https://photon.komoot.io/api/",                                    // sugestões de endereço
-    rotaUrl:  "https://api.heigit.org/openrouteservice/v2/directions/driving-car", // distância de carro
+    // "google" = endereço com número da casa (precisa da chave do Google no chave.js)
+    // "gratis" = OpenStreetMap, sem número da casa
+    // Se escolher "google" e a chave não estiver lá, usa o gratuito automaticamente.
+    provedor: "google",
+
     centro: { lat: -25.0945, lon: -50.1633 },   // centro de Ponta Grossa: sugestões próximas aparecem primeiro
-    regiao: [-51.2, -25.8, -49.4, -24.3],       // só busca nos Campos Gerais (oeste, sul, leste, norte)
     lembrarRetirada: true,                      // o celular de quem usa lembra o último endereço de retirada
+
+    google: {
+      autocompleteUrl: "https://places.googleapis.com/v1/places:autocomplete",
+      detalhesUrl:     "https://places.googleapis.com/v1/places/",
+      rotasUrl:        "https://routes.googleapis.com/directions/v2:computeRoutes",
+      raioBuscaMetros: 40000,                   // prioriza endereços até 40 km do centro de PG
+    },
+
+    gratis: {
+      buscaUrl: "https://photon.komoot.io/api/",                                     // sugestões de endereço
+      rotaUrl:  "https://api.heigit.org/openrouteservice/v2/directions/driving-car", // distância de carro
+      regiao: [-51.2, -25.8, -49.4, -24.3],     // só busca nos Campos Gerais (oeste, sul, leste, norte)
+    },
   },
 
   // ---------- Arredondamento ----------

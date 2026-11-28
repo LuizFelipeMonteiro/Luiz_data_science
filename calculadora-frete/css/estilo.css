@@ -227,3 +227,4 @@ input[type="date"], input[type="time"] { min-height: 46px; background: #fff; col
 /* Evita que data/horário (que têm largura própria no celular) estourem o cartão */
 .linha-numero > * { min-width: 0; }
 .campo input { max-width: 100%; min-width: 0; display: block; }
+.sugestao-rodape { padding: 6px 12px 4px; text-align: right; font-size: .72rem; color: var(--cor-suave); }

@@ -53,6 +53,12 @@
         li.addEventListener("mousedown", function (e) { e.preventDefault(); escolher(i); });
         lista.appendChild(li);
       });
+      if (opcoes.rodape) {                 // crédito exigido pelo provedor (ex.: Google)
+        var rod = document.createElement("li");
+        rod.className = "sugestao-rodape";
+        rod.textContent = opcoes.rodape;
+        lista.appendChild(rod);
+      }
       lista.hidden = false;
       input.setAttribute("aria-expanded", "true");
     }
